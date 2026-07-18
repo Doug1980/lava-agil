@@ -1,11 +1,11 @@
 'use client';
 
+import { TZDate } from '@date-fns/tz';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { TZDate } from '@date-fns/tz';
-import { CheckCircle2, Car, Clock, Wallet } from 'lucide-react';
-import { formatCurrency, formatDuration } from '@/lib/format';
+import { Car, CheckCircle2, Clock, Wallet } from 'lucide-react';
 import { TIMEZONE } from '@/lib/constants';
+import { formatCurrency, formatDuration } from '@/lib/format';
 import type { Appointment, VehicleSize } from '@/types/api';
 
 const SIZE_LABEL: Record<VehicleSize, string> = {
@@ -36,8 +36,7 @@ export function BookingConfirmation({ appointment, onReset }: Props) {
         <CheckCircle2 className="size-10 text-primary" aria-hidden />
         <h2 className="text-xl font-semibold">Agendamento confirmado</h2>
         <p className="text-sm text-muted-foreground">
-          Guarde o código{' '}
-          <span className="text-sm">{day}</span>
+          Guarde o código <span className="text-sm">{day}</span>
         </p>
       </div>
 

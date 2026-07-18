@@ -1,9 +1,9 @@
 import { z } from 'zod';
+import { fail, handleError, json } from '@/lib/api';
 import { updateStatusSchema } from '@/lib/schemas/appointment';
 import { findAppointmentById, updateStatus } from '@/server/db/queries/appointments';
-import { assertTransition } from '@/server/services/status';
 import { toAppointmentResponse } from '@/server/services/mapper';
-import { fail, handleError, json } from '@/lib/api';
+import { assertTransition } from '@/server/services/status';
 
 type Params = { params: Promise<{ id: string }> };
 

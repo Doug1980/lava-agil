@@ -1,14 +1,12 @@
 import { z } from 'zod';
-import { toggleItemCompleted } from '@/server/db/queries/appointments';
 import { fail, handleError, json } from '@/lib/api';
+import { toggleItemCompleted } from '@/server/db/queries/appointments';
 
 type Params = { params: Promise<{ id: string; itemId: string }> };
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    const { itemId } = z
-      .object({ id: z.uuid(), itemId: z.uuid() })
-      .parse(await params);
+    const { itemId } = z.object({ id: z.uuid(), itemId: z.uuid() }).parse(await params);
 
     const { completed } = z.object({ completed: z.boolean() }).parse(await request.json());
 

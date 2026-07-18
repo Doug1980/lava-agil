@@ -2,16 +2,16 @@
 
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { useBookingCart } from '@/hooks/use-booking-cart';
-import { useAvailability, useCatalog } from '@/hooks/use-availability';
-import { Skeleton } from '@/components/ui/skeleton';
-import { VehicleSizePicker } from '@/components/client/vehicle-size-picker';
-import { BaseServicePicker, AddonPicker } from '@/components/client/service-picker';
+import { BookingConfirmation } from '@/components/client/booking-confirmation';
+import { BookingForm } from '@/components/client/booking-form';
 import { CartSummary } from '@/components/client/cart-summary';
 import { DatePicker } from '@/components/client/date-picker';
+import { AddonPicker, BaseServicePicker } from '@/components/client/service-picker';
 import { SlotGrid } from '@/components/client/slot-grid';
-import { BookingForm } from '@/components/client/booking-form';
-import { BookingConfirmation } from '@/components/client/booking-confirmation';
+import { VehicleSizePicker } from '@/components/client/vehicle-size-picker';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAvailability, useCatalog } from '@/hooks/use-availability';
+import { useBookingCart } from '@/hooks/use-booking-cart';
 import type { Appointment } from '@/types/api';
 
 function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {

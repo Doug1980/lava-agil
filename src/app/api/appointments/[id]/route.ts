@@ -1,7 +1,7 @@
 import { z } from 'zod';
+import { fail, handleError, json } from '@/lib/api';
 import { deleteAppointment, findAppointmentById } from '@/server/db/queries/appointments';
 import { toAppointmentResponse } from '@/server/services/mapper';
-import { fail, handleError, json } from '@/lib/api';
 
 type Params = { params: Promise<{ id: string }> };
 

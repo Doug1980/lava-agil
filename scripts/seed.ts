@@ -1,6 +1,6 @@
 import { config } from 'dotenv';
-import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from '../src/server/db/schema';
 import { services, serviceVariants } from '../src/server/db/schema';
 

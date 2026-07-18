@@ -1,14 +1,14 @@
-import { customAlphabet } from 'nanoid';
-import { getDb } from '@/server/db';
-import { appointmentItems, appointments } from '@/server/db/schema';
-import { findVariants } from '@/server/db/queries/services';
-import { findActiveBookings } from '@/server/db/queries/appointments';
-import { assertBookable, computeEndsAt } from './availability';
-import { assertValidSelection, calculateTotals } from './pricing';
-import { BusinessRuleError } from './errors';
-import type { CreateAppointmentInput } from '@/lib/schemas/appointment';
-import { TIMEZONE } from '@/lib/constants';
 import { TZDate } from '@date-fns/tz';
+import { customAlphabet } from 'nanoid';
+import { TIMEZONE } from '@/lib/constants';
+import type { CreateAppointmentInput } from '@/lib/schemas/appointment';
+import { getDb } from '@/server/db';
+import { findActiveBookings } from '@/server/db/queries/appointments';
+import { findVariants } from '@/server/db/queries/services';
+import { appointmentItems, appointments } from '@/server/db/schema';
+import { assertBookable, computeEndsAt } from './availability';
+import { BusinessRuleError } from './errors';
+import { assertValidSelection, calculateTotals } from './pricing';
 
 const generateCode = customAlphabet('0123456789', 4);
 

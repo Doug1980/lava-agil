@@ -1,17 +1,17 @@
 'use client';
 
-import type { ReactNode } from 'react';
-import { useForm } from 'react-hook-form';
+import { TZDate } from '@date-fns/tz';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { TZDate } from '@date-fns/tz';
-import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import type { ReactNode } from 'react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { TIMEZONE } from '@/lib/constants';
-import { bookingFormSchema, type BookingFormValues } from '@/lib/schemas/booking-form';
 import type { CreateAppointmentInput } from '@/lib/schemas/appointment';
-import type { Appointment, ApiError, VehicleSize } from '@/types/api';
+import { type BookingFormValues, bookingFormSchema } from '@/lib/schemas/booking-form';
+import { cn } from '@/lib/utils';
+import type { ApiError, Appointment, VehicleSize } from '@/types/api';
 
 /**
  * Rede local: o tratamento de 409/422 depende de ler o corpo `ApiError`.
@@ -125,13 +125,13 @@ export function BookingForm({
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
       <Field label="Nome" error={errors.customer?.name?.message}>
-  <input
-    {...form.register('customer.name')}
-    className={inputClass}
-    aria-invalid={!!errors.customer?.name}
-    autoComplete="name"
-  />
-</Field>
+        <input
+          {...form.register('customer.name')}
+          className={inputClass}
+          aria-invalid={!!errors.customer?.name}
+          autoComplete="name"
+        />
+      </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Telefone" error={errors.customer?.phone?.message}>

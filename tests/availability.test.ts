@@ -1,12 +1,12 @@
-import { describe, expect, it } from 'vitest';
 import { TZDate } from '@date-fns/tz';
+import { describe, expect, it } from 'vitest';
+import { TIMEZONE } from '@/lib/constants';
 import {
+  type BookedRange,
   computeEndsAt,
   getDayAvailability,
   zonedAt,
-  type BookedRange,
 } from '@/server/services/availability';
-import { TIMEZONE } from '@/lib/constants';
 
 /** Quinta, 23/07/2026, 08:00. Todas as datas de teste são posteriores. */
 const NOW = TZDate.tz(TIMEZONE, 2026, 6, 23, 8, 0, 0, 0);
@@ -57,7 +57,9 @@ describe('jornada de trabalho', () => {
   });
 
   it('gera a grade de 15 em 15 minutos', () => {
-    const times = availability(FRIDAY, 30).slots.slice(0, 4).map((s) => s.time);
+    const times = availability(FRIDAY, 30)
+      .slots.slice(0, 4)
+      .map((s) => s.time);
     expect(times).toEqual(['09:00', '09:15', '09:30', '09:45']);
   });
 });

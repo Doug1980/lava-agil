@@ -1,7 +1,7 @@
 import { and, asc, eq, gt, lt, ne, sql } from 'drizzle-orm';
+import type { AppointmentStatus } from '@/lib/schemas/appointment';
 import { getDb } from '@/server/db';
 import { appointmentItems, appointments } from '@/server/db/schema';
-import type { AppointmentStatus } from '@/lib/schemas/appointment';
 import type { BookedRange } from '@/server/services/availability';
 import { zonedAt } from '@/server/services/availability';
 
@@ -35,10 +35,7 @@ export async function findAppointmentById(id: string) {
   return appointment ?? null;
 }
 
-export async function listAppointments(filters: {
-  date?: string;
-  status?: AppointmentStatus;
-}) {
+export async function listAppointments(filters: { date?: string; status?: AppointmentStatus }) {
   const db = getDb();
   const conditions = [];
 

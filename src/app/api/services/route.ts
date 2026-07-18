@@ -1,6 +1,6 @@
+import { handleError, json } from '@/lib/api';
 import { servicesQuerySchema } from '@/lib/schemas/appointment';
 import { listCatalog } from '@/server/db/queries/services';
-import { handleError, json } from '@/lib/api';
 
 export async function GET(request: Request) {
   try {

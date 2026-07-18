@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import type { DayAvailability, SlotReason } from '@/types/api';
 
 const REASON_LABEL: Record<SlotReason, string> = {

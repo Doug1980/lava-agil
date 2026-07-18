@@ -1,7 +1,7 @@
 import { and, asc, eq, inArray } from 'drizzle-orm';
+import type { VehicleSize } from '@/lib/schemas/appointment';
 import { getDb } from '@/server/db';
 import { services, serviceVariants } from '@/server/db/schema';
-import type { VehicleSize } from '@/lib/schemas/appointment';
 import type { CatalogItem } from '@/server/services/pricing';
 
 export type VariantRow = CatalogItem & {

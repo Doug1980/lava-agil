@@ -1,11 +1,8 @@
-import {
-  createAppointmentSchema,
-  listAppointmentsQuerySchema,
-} from '@/lib/schemas/appointment';
-import { createAppointment } from '@/server/services/booking';
-import { listAppointments } from '@/server/db/queries/appointments';
-import { toAppointmentResponse } from '@/server/services/mapper';
 import { handleError, json } from '@/lib/api';
+import { createAppointmentSchema, listAppointmentsQuerySchema } from '@/lib/schemas/appointment';
+import { listAppointments } from '@/server/db/queries/appointments';
+import { createAppointment } from '@/server/services/booking';
+import { toAppointmentResponse } from '@/server/services/mapper';
 
 export async function GET(request: Request) {
   try {

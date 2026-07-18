@@ -1,8 +1,8 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { formatCurrency, formatDuration } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { CatalogEntry } from '@/types/api';
 
 type BaseProps = {

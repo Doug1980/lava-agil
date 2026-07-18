@@ -1,7 +1,7 @@
+import { handleError, json } from '@/lib/api';
 import { availabilityQuerySchema } from '@/lib/schemas/appointment';
 import { findActiveBookings } from '@/server/db/queries/appointments';
 import { getDayAvailability } from '@/server/services/availability';
-import { handleError, json } from '@/lib/api';
 
 export async function GET(request: Request) {
   try {
@@ -13,9 +13,7 @@ export async function GET(request: Request) {
 
     const bookings = await findActiveBookings(date);
 
-    return json(
-      getDayAvailability({ date, durationMinutes, bookings, now: new Date() }),
-    );
+    return json(getDayAvailability({ date, durationMinutes, bookings, now: new Date() }));
   } catch (err) {
     return handleError(err);
   }

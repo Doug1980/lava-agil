@@ -1,15 +1,15 @@
-import {
-  pgTable,
-  uuid,
-  text,
-  integer,
-  timestamp,
-  boolean,
-  pgEnum,
-  unique,
-  index,
-} from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import {
+  boolean,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 export const serviceKindEnum = pgEnum('service_kind', ['base', 'addon']);
 

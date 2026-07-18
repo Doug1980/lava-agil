@@ -2,12 +2,7 @@ import { z } from 'zod';
 
 export const vehicleSizeSchema = z.enum(['hatch', 'sedan', 'suv']);
 
-export const appointmentStatusSchema = z.enum([
-  'scheduled',
-  'confirmed',
-  'completed',
-  'cancelled',
-]);
+export const appointmentStatusSchema = z.enum(['scheduled', 'confirmed', 'completed', 'cancelled']);
 
 /** Aceita o padrão antigo (ABC1234) e o Mercosul (ABC1D23). */
 const plateSchema = z

@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  assertValidSelection,
-  calculateTotals,
-  type CatalogItem,
-} from '@/server/services/pricing';
 import { BusinessRuleError } from '@/server/services/errors';
+import { assertValidSelection, type CatalogItem, calculateTotals } from '@/server/services/pricing';
 
 const lavagemCompleta: CatalogItem = {
   variantId: 'a',
@@ -68,8 +64,6 @@ describe('assertValidSelection', () => {
   });
 
   it('recusa itens duplicados', () => {
-    expect(() => assertValidSelection([lavagemCompleta, pretinho, pretinho])).toThrow(
-      /duplicados/,
-    );
+    expect(() => assertValidSelection([lavagemCompleta, pretinho, pretinho])).toThrow(/duplicados/);
   });
 });

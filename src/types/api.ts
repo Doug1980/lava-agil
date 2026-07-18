@@ -1,5 +1,6 @@
-import type { VehicleSize, AppointmentStatus } from '@/lib/schemas/appointment';
-export type { VehicleSize, AppointmentStatus };
+import type { AppointmentStatus, VehicleSize } from '@/lib/schemas/appointment';
+
+export type { AppointmentStatus, VehicleSize };
 
 export type ServiceKind = 'base' | 'addon';
 

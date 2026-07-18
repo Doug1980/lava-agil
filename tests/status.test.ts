@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { allowedTransitions, assertTransition, canTransition } from '@/server/services/status';
 import { BusinessRuleError } from '@/server/services/errors';
+import { allowedTransitions, assertTransition, canTransition } from '@/server/services/status';
 
 describe('máquina de estados', () => {
   it('permite agendado para confirmado ou cancelado', () => {
