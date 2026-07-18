@@ -14,6 +14,7 @@ const NOW = TZDate.tz(TIMEZONE, 2026, 6, 23, 8, 0, 0, 0);
 const FRIDAY = '2026-07-24';
 const SATURDAY = '2026-07-25';
 const SUNDAY = '2026-07-26';
+const MONDAY = '2026-07-27';
 
 function availability(
   date: string,
@@ -29,10 +30,16 @@ function slotAt(date: string, duration: number, time: string, bookings: BookedRa
 }
 
 describe('jornada de trabalho', () => {
-  it('domingo retorna fechado e sem slots', () => {
-    const day = availability(SUNDAY, 30);
+  it('segunda retorna fechado e sem slots', () => {
+    const day = availability(MONDAY, 30);
     expect(day.open).toBe(false);
     expect(day.slots).toHaveLength(0);
+  });
+
+  it('domingo abre em jornada cheia', () => {
+    const day = availability(SUNDAY, 30);
+    expect(day.open).toBe(true);
+    expect(day.businessHours).toEqual({ start: '09:00', end: '18:00' });
   });
 
   it('sexta abre 09:00 e fecha 18:00', () => {

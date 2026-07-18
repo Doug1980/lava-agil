@@ -29,7 +29,7 @@ export const createAppointmentSchema = z.object({
   }),
   vehicle: z.object({
     plate: plateSchema,
-    model: z.string().trim().min(2, 'Informe o modelo').max(60),
+    model: z.string().trim().toUpperCase().min(2, 'Informe o modelo').max(60),
     size: vehicleSizeSchema,
   }),
   startsAt: z.iso.datetime({ offset: true }),

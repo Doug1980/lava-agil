@@ -12,8 +12,8 @@ type BusinessHours = { start: string; end: string } | null;
 
 /** 0 = domingo, 6 = sábado */
 export const BUSINESS_HOURS: Record<number, BusinessHours> = {
-  0: null,
-  1: { start: '09:00', end: '18:00' },
+  0: { start: '09:00', end: '18:00' },
+  1: null,
   2: { start: '09:00', end: '18:00' },
   3: { start: '09:00', end: '18:00' },
   4: { start: '09:00', end: '18:00' },
