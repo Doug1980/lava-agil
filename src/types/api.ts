@@ -1,0 +1,66 @@
+import type { VehicleSize, AppointmentStatus } from '@/lib/schemas/appointment';
+export type { VehicleSize, AppointmentStatus };
+
+export type ServiceKind = 'base' | 'addon';
+
+export type CatalogEntry = {
+  id: string;
+  slug: string;
+  name: string;
+  kind: ServiceKind;
+  description: string | null;
+  sortOrder: number;
+  variantId: string;
+  durationMinutes: number;
+  priceCents: number;
+};
+
+export type Catalog = {
+  base: CatalogEntry[];
+  addons: CatalogEntry[];
+};
+
+export type SlotReason = 'past' | 'closing' | 'occupied';
+
+export type Slot = {
+  time: string;
+  available: boolean;
+  reason?: SlotReason;
+};
+
+export type DayAvailability = {
+  date: string;
+  open: boolean;
+  businessHours: { start: string; end: string } | null;
+  slots: Slot[];
+};
+
+export type AppointmentItem = {
+  id: string;
+  name: string;
+  kind: ServiceKind;
+  durationMinutes: number;
+  priceCents: number;
+  completed: boolean;
+};
+
+export type Appointment = {
+  id: string;
+  code: string;
+  customer: { name: string; phone: string; email: string | null };
+  vehicle: { plate: string; model: string; size: VehicleSize };
+  startsAt: string;
+  endsAt: string;
+  serviceMinutes: number;
+  totalPriceCents: number;
+  status: AppointmentStatus;
+  statusLabel: string;
+  notes: string | null;
+  createdAt: string;
+  items: AppointmentItem[];
+};
+
+export type ApiError = {
+  error: string;
+  message: string;
+};
