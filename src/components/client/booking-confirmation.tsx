@@ -25,7 +25,8 @@ type Props = {
 
 export function BookingConfirmation({ appointment, onReset }: Props) {
   const start = zoned(appointment.startsAt);
-  const day = format(start, "EEEE, d 'de' MMMM", { locale: ptBR });
+  const rawDay = format(start, "EEEE, d 'de' MMMM", { locale: ptBR });
+  const day = rawDay.charAt(0).toUpperCase() + rawDay.slice(1);
   const startTime = format(start, 'HH:mm');
   const endTime = format(zoned(appointment.endsAt), 'HH:mm');
 
@@ -36,7 +37,7 @@ export function BookingConfirmation({ appointment, onReset }: Props) {
         <h2 className="text-xl font-semibold">Agendamento confirmado</h2>
         <p className="text-sm text-muted-foreground">
           Guarde o código{' '}
-          <span className="font-mono font-medium text-foreground">{appointment.code}</span>
+          <span className="text-sm">{day}</span>
         </p>
       </div>
 
