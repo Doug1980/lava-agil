@@ -1,4 +1,5 @@
 import { ZodError } from 'zod';
+import { isUnauthorizedError } from '@/lib/firebase/require-admin';
 import { isExclusionViolation } from '@/server/db/errors';
 import { isBusinessRuleError } from '@/server/services/errors';
 
@@ -25,6 +26,10 @@ export function handleError(err: unknown): Response {
 
   if (isBusinessRuleError(err)) {
     return fail(err.rule, err.message, 422);
+  }
+
+  if (isUnauthorizedError(err)) {
+    return fail('UNAUTHORIZED', 'Sessão inválida ou expirada.', 401);
   }
 
   console.error('[api] erro não tratado:', err);

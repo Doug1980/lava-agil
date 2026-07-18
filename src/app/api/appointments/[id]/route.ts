@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { fail, handleError, json } from '@/lib/api';
+import { requireAdmin } from '@/lib/firebase/require-admin';
 import { deleteAppointment, findAppointmentById } from '@/server/db/queries/appointments';
 import { toAppointmentResponse } from '@/server/services/mapper';
 
@@ -7,6 +8,7 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: Params) {
   try {
+    await requireAdmin();
     const { id } = z.object({ id: z.uuid() }).parse(await params);
     const row = await findAppointmentById(id);
 
@@ -19,6 +21,7 @@ export async function GET(_request: Request, { params }: Params) {
 
 export async function DELETE(_request: Request, { params }: Params) {
   try {
+    await requireAdmin();
     const { id } = z.object({ id: z.uuid() }).parse(await params);
     const row = await deleteAppointment(id);
 

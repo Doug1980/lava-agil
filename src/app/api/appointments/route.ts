@@ -1,4 +1,5 @@
 import { handleError, json } from '@/lib/api';
+import { requireAdmin } from '@/lib/firebase/require-admin';
 import { createAppointmentSchema, listAppointmentsQuerySchema } from '@/lib/schemas/appointment';
 import { listAppointments } from '@/server/db/queries/appointments';
 import { createAppointment } from '@/server/services/booking';
@@ -6,6 +7,7 @@ import { toAppointmentResponse } from '@/server/services/mapper';
 
 export async function GET(request: Request) {
   try {
+    await requireAdmin();
     const { searchParams } = new URL(request.url);
     const filters = listAppointmentsQuerySchema.parse({
       date: searchParams.get('date') ?? undefined,

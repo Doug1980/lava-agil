@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { fail, handleError, json } from '@/lib/api';
+import { requireAdmin } from '@/lib/firebase/require-admin';
 import { updateStatusSchema } from '@/lib/schemas/appointment';
 import { findAppointmentById, updateStatus } from '@/server/db/queries/appointments';
 import { toAppointmentResponse } from '@/server/services/mapper';
@@ -9,6 +10,7 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
+    await requireAdmin();
     const { id } = z.object({ id: z.uuid() }).parse(await params);
     const { status } = updateStatusSchema.parse(await request.json());
 
