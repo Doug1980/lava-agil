@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation';
-import { isAdminEmail } from '@/lib/firebase/roles';
+import { BookingFlow } from '@/components/client/booking-flow';
 import { getSessionUser } from '@/lib/firebase/session';
 
-export default async function HomePage() {
+export default async function AgendarPage() {
   const user = await getSessionUser();
-
   if (!user) redirect('/entrar');
-  if (isAdminEmail(user.email)) redirect('/admin');
-  redirect('/agendar');
+
+  return <BookingFlow />;
 }

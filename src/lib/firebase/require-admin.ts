@@ -1,3 +1,4 @@
+import { isAdminEmail } from './roles';
 import { getSessionUser } from './session';
 
 export class UnauthorizedError extends Error {
@@ -11,9 +12,9 @@ export function isUnauthorizedError(err: unknown): err is UnauthorizedError {
   return err instanceof UnauthorizedError;
 }
 
-/** Garante que há uma sessão de admin válida. Lança UnauthorizedError se não. */
+/** Garante sessão de admin (logado E com email admin). */
 export async function requireAdmin() {
   const user = await getSessionUser();
-  if (!user) throw new UnauthorizedError();
+  if (!user || !isAdminEmail(user.email)) throw new UnauthorizedError();
   return user;
 }
