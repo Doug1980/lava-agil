@@ -61,6 +61,26 @@ export type Appointment = {
   items: AppointmentItem[];
 };
 
+/** Visão pública, consultável por código (sem telefone, placa ou e-mail). */
+export type PublicAppointment = {
+  code: string;
+  customerName: string;
+  vehicleModel: string;
+  vehicleSize: VehicleSize;
+  startsAt: string;
+  endsAt: string;
+  serviceMinutes: number;
+  totalPriceCents: number;
+  status: AppointmentStatus;
+  statusLabel: string;
+  items: Array<{
+    name: string;
+    kind: ServiceKind;
+    durationMinutes: number;
+    priceCents: number;
+  }>;
+};
+
 export type ApiError = {
   error: string;
   message: string;

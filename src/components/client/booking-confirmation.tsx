@@ -4,6 +4,7 @@ import { TZDate } from '@date-fns/tz';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Car, CheckCircle2, Clock, Wallet } from 'lucide-react';
+import Link from 'next/link';
 import { TIMEZONE } from '@/lib/constants';
 import { formatCurrency, formatDuration } from '@/lib/format';
 import type { Appointment, VehicleSize } from '@/types/api';
@@ -36,13 +37,16 @@ export function BookingConfirmation({ appointment, onReset }: Props) {
         <CheckCircle2 className="size-10 text-primary" aria-hidden />
         <h2 className="text-xl font-semibold">Agendamento confirmado</h2>
         <p className="text-sm text-muted-foreground">
-          Guarde o código <span className="text-sm">{day}</span>
+          Guarde o código{' '}
+          <span className="font-mono font-semibold tracking-wide text-foreground">
+            {appointment.code}
+          </span>
         </p>
       </div>
 
       <div className="space-y-4 rounded-lg border p-5">
         <div className="flex items-center justify-between">
-          <span className="text-sm capitalize">{day}</span>
+          <span className="text-sm">{day}</span>
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
             {appointment.statusLabel}
           </span>
@@ -88,13 +92,21 @@ export function BookingConfirmation({ appointment, onReset }: Props) {
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onReset}
-        className="w-full rounded-md border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
-        Novo agendamento
-      </button>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Link
+          href="/meus-agendamentos"
+          className="flex-1 rounded-md bg-primary px-4 py-2.5 text-center text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Ver meus agendamentos
+        </Link>
+        <button
+          type="button"
+          onClick={onReset}
+          className="flex-1 rounded-md border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          Novo agendamento
+        </button>
+      </div>
     </div>
   );
 }

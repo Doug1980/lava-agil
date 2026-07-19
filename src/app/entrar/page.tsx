@@ -2,7 +2,6 @@
 
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Loader2, LogIn } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { auth } from '@/lib/firebase/client';
@@ -29,7 +28,7 @@ export default function EntrarPage() {
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const token = await credential.user.getIdToken();
 
-      const res = await fetch('/api/admin/session', {
+      const res = await fetch('/api/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
@@ -37,9 +36,8 @@ export default function EntrarPage() {
 
       if (!res.ok) throw new Error('session');
 
-      // Descobre o papel e roteia.
-      const me = await fetch('/api/me').then((r) => r.json());
-      router.push(me.isAdmin ? '/admin' : '/agendar');
+      // Acesso administrativo. A página /admin revalida o papel no servidor.
+      router.push('/admin');
       router.refresh();
     } catch {
       setError('E-mail ou senha inválidos.');
@@ -50,8 +48,11 @@ export default function EntrarPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold">LavaÁgil</h1>
-        <p className="text-sm text-muted-foreground">Entre para agendar</p>
+        <span className="inline-flex rounded-lg p-2 dark:bg-white">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="LavaÁgil" className="h-16 w-auto" />
+        </span>
+        <p className="mt-2 text-sm text-muted-foreground">Acesso administrativo</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -98,13 +99,6 @@ export default function EntrarPage() {
           )}
           {loading ? 'Entrando...' : 'Entrar'}
         </button>
-
-        <p className="text-center text-sm text-muted-foreground">
-          Não tem conta?{' '}
-          <Link href="/cadastro" className="font-medium text-primary hover:underline">
-            Criar conta
-          </Link>
-        </p>
       </form>
     </main>
   );

@@ -35,14 +35,20 @@ export function toDateKey(date: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+/** Capitaliza apenas a primeira letra da string (não cada palavra). */
+export function capitalizeFirst(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 export function formatLongDate(dateKey: string): string {
   const [y, m, d] = dateKey.split('-').map(Number);
   const date = new Date(y, m - 1, d);
-  return date.toLocaleDateString('pt-BR', {
+  const formatted = date.toLocaleDateString('pt-BR', {
     weekday: 'long',
     day: '2-digit',
     month: 'long',
   });
+  return capitalizeFirst(formatted);
 }
 
 export function maskPhone(value: string): string {

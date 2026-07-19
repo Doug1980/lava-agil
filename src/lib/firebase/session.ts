@@ -12,7 +12,11 @@ export async function getSessionUser() {
 
   try {
     const decoded = await adminAuth.verifySessionCookie(session, true);
-    return { uid: decoded.uid, email: decoded.email ?? null };
+    return {
+      uid: decoded.uid,
+      email: decoded.email ?? null,
+      name: decoded.name ?? null,
+    };
   } catch {
     return null;
   }

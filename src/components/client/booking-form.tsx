@@ -5,9 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { TIMEZONE } from '@/lib/constants';
+import { maskPhone, maskPlate, unmaskDigits } from '@/lib/format';
 import type { CreateAppointmentInput } from '@/lib/schemas/appointment';
 import { type BookingFormValues, bookingFormSchema } from '@/lib/schemas/booking-form';
 import { cn } from '@/lib/utils';
@@ -97,7 +98,7 @@ export function BookingForm({
         customer: {
           name: values.customer.name,
           phone: values.customer.phone,
-          email: values.customer.email || undefined,
+          email: values.customer.email,
         },
         vehicle: { ...values.vehicle, size: vehicleSize },
         startsAt: composeStartsAt(date, time),
@@ -135,35 +136,53 @@ export function BookingForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Telefone" error={errors.customer?.phone?.message}>
-          <input
-            {...form.register('customer.phone')}
-            className={inputClass}
-            aria-invalid={!!errors.customer?.phone}
-            inputMode="numeric"
-            placeholder="11987654321"
-            autoComplete="tel"
+          <Controller
+            control={form.control}
+            name="customer.phone"
+            render={({ field }) => (
+              <input
+                {...field}
+                value={maskPhone(field.value ?? '')}
+                onChange={(e) => field.onChange(unmaskDigits(e.target.value))}
+                className={inputClass}
+                aria-invalid={!!errors.customer?.phone}
+                inputMode="numeric"
+                placeholder="(11) 98765-4321"
+                autoComplete="tel"
+              />
+            )}
           />
         </Field>
 
-        <Field label="E-mail (opcional)" error={errors.customer?.email?.message}>
+        <Field label="E-mail" error={errors.customer?.email?.message}>
           <input
             {...form.register('customer.email')}
             className={inputClass}
             aria-invalid={!!errors.customer?.email}
             inputMode="email"
             autoComplete="email"
+            placeholder="voce@exemplo.com"
           />
         </Field>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Placa" error={errors.vehicle?.plate?.message}>
-          <input
-            {...form.register('vehicle.plate')}
-            className={cn(inputClass, 'uppercase')}
-            aria-invalid={!!errors.vehicle?.plate}
-            placeholder="ABC1D23"
-            maxLength={7}
+          <Controller
+            control={form.control}
+            name="vehicle.plate"
+            render={({ field }) => (
+              <input
+                {...field}
+                value={field.value ?? ''}
+                onChange={(e) => field.onChange(maskPlate(e.target.value))}
+                className={cn(inputClass, 'uppercase')}
+                aria-invalid={!!errors.vehicle?.plate}
+                placeholder="ABC1D23"
+                inputMode="text"
+                autoCapitalize="characters"
+              />
+            )}
           />
         </Field>
 

@@ -10,7 +10,9 @@ import { assertBookable, computeEndsAt } from './availability';
 import { BusinessRuleError } from './errors';
 import { assertValidSelection, calculateTotals } from './pricing';
 
-const generateCode = customAlphabet('0123456789', 4);
+// Alfabeto sem caracteres ambíguos (0/O, 1/I). 6 posições ≈ 887 milhões de
+// combinações: legível de digitar, mas inviável de adivinhar num endpoint público.
+const generateCode = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 6);
 
 function dateKey(d: Date): string {
   const zoned = new TZDate(d, TIMEZONE);

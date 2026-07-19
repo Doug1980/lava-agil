@@ -20,7 +20,7 @@ export const createAppointmentSchema = z.object({
   customer: z.object({
     name: z.string().trim().min(3, 'Nome muito curto').max(120),
     phone: phoneSchema,
-    email: z.union([z.email('E-mail inválido'), z.literal('')]).optional(),
+    email: z.email('Informe um e-mail válido para receber o comprovante'),
   }),
   vehicle: z.object({
     plate: plateSchema,

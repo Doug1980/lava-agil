@@ -23,7 +23,7 @@ export function DatePicker({ value, onChange }: Props) {
         <Button variant="outline" className="w-full justify-start font-normal">
           <CalendarDays className="mr-2 size-4 text-muted-foreground" aria-hidden />
           {value ? (
-            <span className="capitalize">{formatLongDate(value)}</span>
+            <span>{formatLongDate(value)}</span>
           ) : (
             <span className="text-muted-foreground">Escolha uma data</span>
           )}

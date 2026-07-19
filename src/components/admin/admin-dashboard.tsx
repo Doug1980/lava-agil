@@ -29,7 +29,7 @@ export function AdminDashboard() {
     <main className="mx-auto max-w-3xl px-4 py-8">
       <header className="mb-6">
         <h1 className="text-2xl font-bold">Agendamentos</h1>
-        <p className="text-sm capitalize text-muted-foreground">{formatLongDate(date)}</p>
+        <p className="text-sm text-muted-foreground">{formatLongDate(date)}</p>
       </header>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">

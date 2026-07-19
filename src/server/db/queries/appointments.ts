@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, lt, ne, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, lt, ne, sql } from 'drizzle-orm';
 import type { AppointmentStatus } from '@/lib/schemas/appointment';
 import { getDb } from '@/server/db';
 import { appointmentItems, appointments } from '@/server/db/schema';
@@ -22,6 +22,18 @@ export async function findActiveBookings(date: string): Promise<BookedRange[]> {
         gt(appointments.endsAt, dayStart),
       ),
     );
+}
+
+/** Busca pública por códigos (consulta anônima do cliente). */
+export async function findAppointmentsByCodes(codes: string[]) {
+  const db = getDb();
+  if (codes.length === 0) return [];
+
+  return db.query.appointments.findMany({
+    where: inArray(appointments.code, codes),
+    with: { items: true },
+    orderBy: [asc(appointments.startsAt)],
+  });
 }
 
 export async function findAppointmentById(id: string) {
