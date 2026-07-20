@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${montserrat.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-background font-sans text-foreground antialiased">
+      <body className="min-h-screen font-sans text-foreground antialiased">
         <Providers>{children}</Providers>
         <Toaster position="top-center" richColors />
       </body>

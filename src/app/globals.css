@@ -50,7 +50,9 @@
 
 :root {
   /* Paleta minimalista LavaÁgil: branco / cinza claro / navy / azul royal */
-  --background: #f4f6fa;
+  --background: #eaf4ff;
+  /* Fundo "água fresca": gradiente aqua → azul (aplicado no body) */
+  --page-gradient: linear-gradient(160deg, #e9f6ff 0%, #cfe6fb 55%, #c3ddfa 100%);
   --foreground: #0e2148;
   --card: #ffffff;
   --card-foreground: #0e2148;
@@ -87,6 +89,7 @@
 .dark {
   /* Modo escuro premium (navy) */
   --background: #081426;
+  --page-gradient: linear-gradient(160deg, #081426 0%, #0f2138 60%, #0b1a30 100%);
   --foreground: #e8eef9;
   --card: #0f2138;
   --card-foreground: #e8eef9;
@@ -124,7 +127,9 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    min-height: 100dvh;
+    background: var(--page-gradient) fixed;
   }
   html {
     @apply font-sans;
@@ -136,5 +141,64 @@
   h5,
   h6 {
     @apply font-heading;
+  }
+}
+
+/* Animações de seleção dos cards */
+@keyframes pop-in {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes card-select {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1.02);
+  }
+}
+
+.animate-pop {
+  animation: pop-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.animate-card-select {
+  animation: card-select 0.32s ease-out;
+}
+
+/* Entrada em cascata (fade + sobe). Use animation-delay inline para escalonar. */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise-in 0.6s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop,
+  .animate-card-select,
+  .animate-rise {
+    animation: none;
   }
 }

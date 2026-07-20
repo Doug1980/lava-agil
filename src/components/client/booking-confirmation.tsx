@@ -49,7 +49,7 @@ export function BookingConfirmation({ appointment, onReset }: Props) {
         </p>
       </div>
 
-      <div className="space-y-4 rounded-lg border p-5">
+      <div className="space-y-4 rounded-lg border bg-card p-5 shadow-lg shadow-primary/10">
         <div className="flex items-center justify-between">
           <span className="text-sm">{day}</span>
           <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">

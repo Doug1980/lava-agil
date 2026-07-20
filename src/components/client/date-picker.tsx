@@ -1,11 +1,11 @@
 'use client';
 
 import { CalendarDays } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { MAX_ADVANCE_DAYS } from '@/lib/constants';
 import { formatLongDate, toDateKey } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
 type Props = {
   value: string | null;
@@ -20,16 +20,40 @@ export function DatePicker({ value, onChange }: Props) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full justify-start font-normal">
-          <CalendarDays className="mr-2 size-4 text-muted-foreground" aria-hidden />
-          {value ? (
-            <span>{formatLongDate(value)}</span>
-          ) : (
-            <span className="text-muted-foreground">Escolha uma data</span>
+        <button
+          type="button"
+          className={cn(
+            'flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all duration-200',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            value
+              ? 'animate-card-select scale-[1.02] border-primary bg-primary text-primary-foreground shadow-xl shadow-primary/40'
+              : 'border-border bg-card shadow-md shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/15 active:scale-[0.99]',
           )}
-        </Button>
+        >
+          <span
+            className={cn(
+              'flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors',
+              value ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground',
+            )}
+          >
+            <CalendarDays className="size-5" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-medium">
+              {value ? formatLongDate(value) : 'Escolha uma data'}
+            </span>
+            <span
+              className={cn(
+                'mt-0.5 block text-xs',
+                value ? 'text-primary-foreground/70' : 'text-muted-foreground',
+              )}
+            >
+              {value ? 'Toque para alterar' : 'Selecione o dia do atendimento'}
+            </span>
+          </span>
+        </button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="start" collisionPadding={16}>
         <Calendar
           mode="single"
           selected={selected}

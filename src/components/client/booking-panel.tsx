@@ -39,7 +39,7 @@ export function BookingPanel({
 
   return (
     <aside id="horarios" className="lg:sticky lg:top-6 lg:self-start">
-      <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm shadow-primary/5 sm:p-5">
+      <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-xl shadow-primary/10 sm:p-5">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wide">Resumo</h2>
           {empty ? (

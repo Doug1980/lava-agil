@@ -28,22 +28,22 @@ export function VehicleSizePicker({ value, onChange }: Props) {
             aria-checked={selected}
             onClick={() => onChange(size)}
             className={cn(
-              'relative flex items-center gap-3 rounded-xl border p-4 text-left transition-all',
+              'relative flex items-center gap-3 rounded-xl border p-4 text-left transition-all duration-200',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               selected
-                ? 'border-primary bg-secondary shadow-sm shadow-primary/10'
-                : 'border-border bg-card hover:border-primary/50',
+                ? 'animate-card-select scale-[1.02] border-primary bg-primary text-primary-foreground shadow-xl shadow-primary/40'
+                : 'border-border bg-card shadow-md shadow-primary/5 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/15 active:scale-[0.99]',
             )}
           >
             {selected && (
-              <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <span className="animate-pop absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-white text-primary shadow">
                 <Check className="size-3" strokeWidth={3} aria-hidden />
               </span>
             )}
             <span
               className={cn(
-                'flex size-10 shrink-0 items-center justify-center rounded-lg',
-                selected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+                'flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors',
+                selected ? 'bg-white/20 text-white' : 'bg-muted text-muted-foreground',
               )}
             >
               <Icon className="size-5" aria-hidden />
@@ -52,7 +52,14 @@ export function VehicleSizePicker({ value, onChange }: Props) {
               <span className="block font-heading text-sm font-semibold uppercase tracking-wide">
                 {label}
               </span>
-              <span className="block truncate text-xs text-muted-foreground">{hint}</span>
+              <span
+                className={cn(
+                  'block truncate text-xs',
+                  selected ? 'text-primary-foreground/70' : 'text-muted-foreground',
+                )}
+              >
+                {hint}
+              </span>
             </span>
           </button>
         );

@@ -17,9 +17,19 @@ import { formatCurrency, formatDuration } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { Appointment } from '@/types/api';
 
-function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
+function Step({
+  n,
+  title,
+  children,
+  className,
+}: {
+  n: number;
+  title: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <section className="space-y-3">
+    <section className={cn('space-y-3', className)}>
       <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
         <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
           {n}
@@ -80,6 +90,7 @@ export function BookingFlow() {
   const steps = [
     { label: 'Veículo', done: cart.vehicleSize !== null },
     { label: 'Serviço', done: cart.isValid },
+    { label: 'Adicionais', done: cart.addonsResolved },
     { label: 'Data', done: date !== null },
     { label: 'Horário', done: selectedTime !== null },
   ];
@@ -151,37 +162,37 @@ export function BookingFlow() {
           </Step>
 
           {cart.vehicleSize && (
-            <Step n={2} title="Serviços">
+            <Step n={2} title="Serviço" className="animate-rise">
               {catalog.isLoading || !catalog.data ? (
                 <div className="grid gap-3">
-                  {Array.from({ length: 4 }).map((_, i) => (
+                  {Array.from({ length: 3 }).map((_, i) => (
                     <Skeleton key={i} className="h-16" />
                   ))}
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <BaseServicePicker
-                    services={catalog.data.base}
-                    selected={cart.base}
-                    onSelect={cart.setBase}
-                  />
-                  <div>
-                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      Adicionais
-                    </h3>
-                    <AddonPicker
-                      services={catalog.data.addons}
-                      isSelected={cart.isAddonSelected}
-                      onToggle={cart.toggleAddon}
-                    />
-                  </div>
-                </div>
+                <BaseServicePicker
+                  services={catalog.data.base}
+                  selected={cart.base}
+                  onSelect={cart.setBase}
+                />
               )}
             </Step>
           )}
 
-          {cart.isValid && (
-            <Step n={3} title="Data">
+          {cart.isValid && catalog.data && (
+            <Step n={3} title="Adicionais" className="animate-rise">
+              <AddonPicker
+                services={catalog.data.addons}
+                isSelected={cart.isAddonSelected}
+                onToggle={cart.toggleAddon}
+                noAddonsSelected={cart.noAddons}
+                onChooseNoAddons={cart.chooseNoAddons}
+              />
+            </Step>
+          )}
+
+          {cart.addonsResolved && (
+            <Step n={4} title="Data" className="animate-rise">
               <DatePicker
                 value={date}
                 onChange={(next) => {
@@ -211,7 +222,7 @@ export function BookingFlow() {
         <section id="seus-dados" className="mt-10 max-w-2xl scroll-mt-6">
           <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
             <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
-              4
+              5
             </span>
             Seus dados
           </h2>
