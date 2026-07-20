@@ -41,7 +41,7 @@ export function BookingPanel({
     <aside id="horarios" className="lg:sticky lg:top-6 lg:self-start">
       <div className="space-y-4 rounded-2xl border bg-card p-4 shadow-sm shadow-primary/5 sm:p-5">
         <div>
-          <h2 className="text-sm font-semibold">Resumo</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-wide">Resumo</h2>
           {empty ? (
             <div className="mt-3 flex flex-col items-center gap-2 rounded-xl bg-secondary/60 px-4 py-6 text-center">
               <span className="flex size-11 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -66,7 +66,7 @@ export function BookingPanel({
         </div>
 
         {!empty && (
-          <div className="flex items-center justify-between rounded-xl bg-[#04244f] px-4 py-3">
+          <div className="flex items-center justify-between rounded-xl bg-[#0e2148] px-4 py-3">
             <span className="flex items-center gap-1.5 text-sm text-blue-100">
               <Clock className="size-4" aria-hidden />
               <span className="font-semibold tabular-nums text-white">
@@ -84,7 +84,7 @@ export function BookingPanel({
 
         <div className="border-t pt-3">
           <div className="mb-2 flex items-center justify-between gap-2">
-            <h3 className="flex items-center gap-1.5 text-sm font-medium">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-wide">
               <CalendarClock className="size-4 text-muted-foreground" aria-hidden />
               Horários
             </h3>
@@ -115,7 +115,7 @@ export function BookingPanel({
           <button
             type="button"
             onClick={onContinue}
-            style={{ backgroundImage: 'linear-gradient(135deg, #0352d8, #1993e5)' }}
+            style={{ backgroundImage: 'linear-gradient(135deg, #1e5fd6, #3b8bee)' }}
             className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Continuar para seus dados

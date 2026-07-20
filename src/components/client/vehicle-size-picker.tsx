@@ -49,7 +49,9 @@ export function VehicleSizePicker({ value, onChange }: Props) {
               <Icon className="size-5" aria-hidden />
             </span>
             <span className="min-w-0">
-              <span className="block text-sm font-semibold">{label}</span>
+              <span className="block font-heading text-sm font-semibold uppercase tracking-wide">
+                {label}
+              </span>
               <span className="block truncate text-xs text-muted-foreground">{hint}</span>
             </span>
           </button>

@@ -42,7 +42,9 @@ export function BaseServicePicker({ services, selected, onSelect }: BaseProps) {
               <Droplet className="size-5" aria-hidden />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold">{service.name}</span>
+              <span className="block font-heading text-sm font-semibold uppercase tracking-wide">
+                {service.name}
+              </span>
               {service.description && (
                 <span className="mt-0.5 block text-xs text-muted-foreground">
                   {service.description}

@@ -56,7 +56,7 @@ export function SlotGrid({ data, isLoading, selected, onSelect }: Props) {
               onClick={() => onSelect(slot.time)}
               style={
                 isSelected
-                  ? { backgroundImage: 'linear-gradient(135deg, #0352d8, #1993e5)' }
+                  ? { backgroundImage: 'linear-gradient(135deg, #1e5fd6, #3b8bee)' }
                   : undefined
               }
               className={cn(

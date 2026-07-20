@@ -36,11 +36,11 @@ export function BookingConfirmation({ appointment, onReset }: Props) {
       <div className="flex flex-col items-center gap-3 text-center">
         <span
           className="flex size-16 items-center justify-center rounded-full text-white shadow-lg shadow-primary/30"
-          style={{ backgroundImage: 'linear-gradient(135deg, #0352d8, #1993e5)' }}
+          style={{ backgroundImage: 'linear-gradient(135deg, #1e5fd6, #3b8bee)' }}
         >
           <CheckCircle2 className="size-9" aria-hidden />
         </span>
-        <h2 className="text-2xl font-bold">Agendamento confirmado</h2>
+        <h2 className="text-2xl font-bold uppercase tracking-wide">Agendamento confirmado</h2>
         <p className="text-sm text-muted-foreground">
           Guarde o código{' '}
           <span className="font-mono font-semibold tracking-wide text-foreground">

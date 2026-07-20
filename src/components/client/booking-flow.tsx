@@ -20,7 +20,7 @@ import type { Appointment } from '@/types/api';
 function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
   return (
     <section className="space-y-3">
-      <h2 className="flex items-center gap-2 text-sm font-semibold">
+      <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
         <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
           {n}
         </span>
@@ -89,7 +89,7 @@ export function BookingFlow() {
     <main className="mx-auto max-w-5xl px-4 py-6">
       <section
         className="relative overflow-hidden rounded-3xl px-6 py-8 text-center"
-        style={{ backgroundImage: 'linear-gradient(135deg, #04244f, #0352d8)' }}
+        style={{ backgroundImage: 'linear-gradient(135deg, #0e2148, #1e5fd6)' }}
       >
         <span aria-hidden className="pointer-events-none absolute -left-8 -top-8 size-32 rounded-full bg-white/10" />
         <span aria-hidden className="pointer-events-none absolute right-6 top-4 size-16 rounded-full bg-white/10" />
@@ -98,7 +98,7 @@ export function BookingFlow() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="LavaÁgil" className="h-32 w-auto sm:h-40" />
         </span>
-        <h1 className="relative mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+        <h1 className="relative mt-5 text-3xl font-extrabold uppercase tracking-wide text-white sm:text-4xl">
           Agende sua lavagem
         </h1>
         <p className="relative mt-1 text-sm text-blue-100">
@@ -166,7 +166,9 @@ export function BookingFlow() {
                     onSelect={cart.setBase}
                   />
                   <div>
-                    <h3 className="mb-3 text-sm font-medium text-muted-foreground">Adicionais</h3>
+                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      Adicionais
+                    </h3>
                     <AddonPicker
                       services={catalog.data.addons}
                       isSelected={cart.isAddonSelected}
@@ -207,7 +209,7 @@ export function BookingFlow() {
 
       {canBook && cart.vehicleSize && date && selectedTime && (
         <section id="seus-dados" className="mt-10 max-w-2xl scroll-mt-6">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
             <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-xs text-primary">
               4
             </span>

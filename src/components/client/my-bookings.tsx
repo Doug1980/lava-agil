@@ -44,7 +44,7 @@ export function MyBookings() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold">Meus agendamentos</h1>
+        <h1 className="text-2xl font-bold uppercase tracking-wide">Meus agendamentos</h1>
         <p className="text-sm text-muted-foreground">
           Acompanhe o status dos seus atendimentos. A lista fica salva neste navegador.
         </p>
