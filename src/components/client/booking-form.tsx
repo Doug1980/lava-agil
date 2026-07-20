@@ -125,7 +125,7 @@ export function BookingForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
-      <Field label="Nome" error={errors.customer?.name?.message}>
+      <Field label="Nome *(obrigatório)" error={errors.customer?.name?.message}>
         <input
           {...form.register('customer.name')}
           className={inputClass}
@@ -135,7 +135,7 @@ export function BookingForm({
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Telefone" error={errors.customer?.phone?.message}>
+        <Field label="Telefone *(obrigatório)" error={errors.customer?.phone?.message}>
           <Controller
             control={form.control}
             name="customer.phone"
@@ -154,7 +154,7 @@ export function BookingForm({
           />
         </Field>
 
-        <Field label="E-mail" error={errors.customer?.email?.message}>
+        <Field label="E-mail *(obrigatório)" error={errors.customer?.email?.message}>
           <input
             {...form.register('customer.email')}
             className={inputClass}
@@ -167,7 +167,7 @@ export function BookingForm({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Placa" error={errors.vehicle?.plate?.message}>
+        <Field label="Placa *(obrigatório)" error={errors.vehicle?.plate?.message}>
           <Controller
             control={form.control}
             name="vehicle.plate"
@@ -186,7 +186,7 @@ export function BookingForm({
           />
         </Field>
 
-        <Field label="Modelo" error={errors.vehicle?.model?.message}>
+        <Field label="Modelo *(obrigatório)" error={errors.vehicle?.model?.message}>
           <input
             {...form.register('vehicle.model')}
             className={cn(inputClass, 'uppercase')}

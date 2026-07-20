@@ -1,6 +1,6 @@
 'use client';
 
-import { Car, Truck } from 'lucide-react';
+import { Car, Check, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { VehicleSize } from '@/types/api';
 
@@ -28,19 +28,28 @@ export function VehicleSizePicker({ value, onChange }: Props) {
             aria-checked={selected}
             onClick={() => onChange(size)}
             className={cn(
-              'flex items-center gap-3 rounded-lg border p-4 text-left transition-colors',
+              'relative flex items-center gap-3 rounded-xl border p-4 text-left transition-all',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               selected
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-muted-foreground/40',
+                ? 'border-primary bg-secondary shadow-sm shadow-primary/10'
+                : 'border-border bg-card hover:border-primary/50',
             )}
           >
-            <Icon
-              className={cn('size-5 shrink-0', selected ? 'text-primary' : 'text-muted-foreground')}
-              aria-hidden
-            />
+            {selected && (
+              <span className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <Check className="size-3" strokeWidth={3} aria-hidden />
+              </span>
+            )}
+            <span
+              className={cn(
+                'flex size-10 shrink-0 items-center justify-center rounded-lg',
+                selected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+              )}
+            >
+              <Icon className="size-5" aria-hidden />
+            </span>
             <span className="min-w-0">
-              <span className="block text-sm font-medium">{label}</span>
+              <span className="block text-sm font-semibold">{label}</span>
               <span className="block truncate text-xs text-muted-foreground">{hint}</span>
             </span>
           </button>

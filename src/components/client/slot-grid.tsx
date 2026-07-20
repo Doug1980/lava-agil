@@ -54,13 +54,20 @@ export function SlotGrid({ data, isLoading, selected, onSelect }: Props) {
               disabled={!slot.available}
               title={slot.reason ? REASON_LABEL[slot.reason] : undefined}
               onClick={() => onSelect(slot.time)}
+              style={
+                isSelected
+                  ? { backgroundImage: 'linear-gradient(135deg, #0352d8, #1993e5)' }
+                  : undefined
+              }
               className={cn(
-                'h-9 rounded-md border text-sm tabular-nums transition-colors',
+                'h-9 rounded-lg border text-sm font-semibold tabular-nums transition-all',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                isSelected && 'border-primary bg-primary text-primary-foreground',
-                !isSelected && slot.available && 'border-border hover:border-primary',
+                isSelected && 'border-transparent text-white shadow-md shadow-primary/30',
+                !isSelected &&
+                  slot.available &&
+                  'border-transparent bg-secondary text-primary hover:bg-primary/15',
                 !slot.available &&
-                  'cursor-not-allowed border-dashed border-border/60 text-muted-foreground/40',
+                  'cursor-not-allowed border border-dashed border-border text-muted-foreground/40',
               )}
             >
               {slot.time}

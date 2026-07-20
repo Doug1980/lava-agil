@@ -48,11 +48,11 @@ export default function EntrarPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
       <div className="mb-6 text-center">
-        <span className="inline-flex rounded-lg p-2 dark:bg-white">
+        <span className="inline-flex rounded-2xl p-3 dark:bg-white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="LavaÁgil" className="h-16 w-auto" />
+          <img src="/logo.png" alt="LavaÁgil" className="h-24 w-auto" />
         </span>
-        <p className="mt-2 text-sm text-muted-foreground">Acesso administrativo</p>
+        <p className="mt-3 text-sm font-medium text-muted-foreground">Acesso administrativo</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>

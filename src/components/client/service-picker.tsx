@@ -1,6 +1,6 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { Check, Droplet } from 'lucide-react';
 import { formatCurrency, formatDuration } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { CatalogEntry } from '@/types/api';
@@ -24,15 +24,25 @@ export function BaseServicePicker({ services, selected, onSelect }: BaseProps) {
             aria-checked={isSelected}
             onClick={() => onSelect(service)}
             className={cn(
-              'flex items-start justify-between gap-4 rounded-lg border p-4 text-left transition-colors',
+              'flex items-center gap-3 rounded-xl border p-4 text-left transition-all',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               isSelected
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-muted-foreground/40',
+                ? 'border-primary bg-secondary shadow-sm shadow-primary/10'
+                : 'border-border bg-card hover:border-primary/50',
             )}
           >
-            <span className="min-w-0">
-              <span className="block text-sm font-medium">{service.name}</span>
+            <span
+              className={cn(
+                'flex size-10 shrink-0 items-center justify-center rounded-lg',
+                isSelected
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground',
+              )}
+            >
+              <Droplet className="size-5" aria-hidden />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold">{service.name}</span>
               {service.description && (
                 <span className="mt-0.5 block text-xs text-muted-foreground">
                   {service.description}
@@ -40,10 +50,10 @@ export function BaseServicePicker({ services, selected, onSelect }: BaseProps) {
               )}
             </span>
             <span className="shrink-0 text-right">
-              <span className="block text-sm font-medium tabular-nums">
+              <span className="block text-sm font-bold tabular-nums text-primary">
                 {formatCurrency(service.priceCents)}
               </span>
-              <span className="block text-xs text-muted-foreground tabular-nums">
+              <span className="mt-1 inline-block rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold tabular-nums text-muted-foreground">
                 {formatDuration(service.durationMinutes)}
               </span>
             </span>
@@ -73,11 +83,11 @@ export function AddonPicker({ services, isSelected, onToggle }: AddonProps) {
             aria-checked={checked}
             onClick={() => onToggle(service)}
             className={cn(
-              'flex items-start gap-3 rounded-lg border p-4 text-left transition-colors',
+              'flex items-start gap-3 rounded-xl border p-4 text-left transition-all',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               checked
-                ? 'border-primary bg-primary/5'
-                : 'border-border hover:border-muted-foreground/40',
+                ? 'border-primary bg-secondary shadow-sm shadow-primary/10'
+                : 'border-border bg-card hover:border-primary/50',
             )}
           >
             <span

@@ -108,7 +108,10 @@ export function MyBookings() {
             }
 
             return (
-              <article key={code} className="rounded-lg border bg-card p-4">
+              <article
+                key={code}
+                className="rounded-2xl border bg-card p-4 shadow-sm shadow-primary/5"
+              >
                 <div className="mb-2 flex items-start justify-between gap-3">
                   <div>
                     <p className="font-mono text-xs text-muted-foreground">{appt.code}</p>

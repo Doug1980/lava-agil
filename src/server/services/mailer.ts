@@ -42,7 +42,7 @@ function renderHtml(data: BookingEmailData): string {
       <p style="font-size: 14px; color: #78350f; margin: 0; line-height: 1.6;">Pedimos, por gentileza, que chegue no horário. Em caso de atraso superior a <b>15 minutos</b>, o agendamento poderá ser adiado automaticamente. Agradecemos pela preferência!</p>
     </div>
     <a href="${trackUrl}" style="display: inline-block; background: #111827; color: #ffffff; padding: 11px 18px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;">Acompanhar meu agendamento</a>
-    <p style="font-size: 12px; color: #9ca3af; margin: 24px 0 0;">Guarde este código: com ele você consulta seu agendamento a qualquer momento, em qualquer dispositivo.</p>
+    <p style="font-size: 12px; color: #374151; margin: 24px 0 0;">Guarde este código: com ele você consulta seu agendamento a qualquer momento, em qualquer dispositivo.</p>
   </div>`;
 }
 

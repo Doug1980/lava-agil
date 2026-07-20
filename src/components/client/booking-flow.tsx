@@ -1,6 +1,6 @@
 'use client';
 
-import { Clock, Wallet } from 'lucide-react';
+import { Check, Clock, Wallet } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { BookingConfirmation } from '@/components/client/booking-confirmation';
@@ -14,6 +14,7 @@ import { useAvailability, useCatalog } from '@/hooks/use-availability';
 import { useBookingCart } from '@/hooks/use-booking-cart';
 import { useMyBookings } from '@/hooks/use-my-bookings';
 import { formatCurrency, formatDuration } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { Appointment } from '@/types/api';
 
 function Step({ n, title, children }: { n: number; title: string; children: ReactNode }) {
@@ -76,12 +77,72 @@ export function BookingFlow() {
   const canBook =
     cart.vehicleSize !== null && cart.isValid && date !== null && selectedTime !== null;
 
+  const steps = [
+    { label: 'Veículo', done: cart.vehicleSize !== null },
+    { label: 'Serviço', done: cart.isValid },
+    { label: 'Data', done: date !== null },
+    { label: 'Horário', done: selectedTime !== null },
+  ];
+  const currentStep = steps.findIndex((s) => !s.done);
+
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold">LavaÁgil</h1>
-        <p className="text-sm text-muted-foreground">Seu carro limpo na hora certa.</p>
-      </header>
+    <main className="mx-auto max-w-5xl px-4 py-6">
+      <section
+        className="relative overflow-hidden rounded-3xl px-6 py-8 text-center"
+        style={{ backgroundImage: 'linear-gradient(135deg, #04244f, #0352d8)' }}
+      >
+        <span aria-hidden className="pointer-events-none absolute -left-8 -top-8 size-32 rounded-full bg-white/10" />
+        <span aria-hidden className="pointer-events-none absolute right-6 top-4 size-16 rounded-full bg-white/10" />
+        <span aria-hidden className="pointer-events-none absolute right-24 top-24 size-8 rounded-full bg-white/10" />
+        <span className="relative inline-flex rounded-3xl bg-white p-4 shadow-xl shadow-black/20">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="LavaÁgil" className="h-32 w-auto sm:h-40" />
+        </span>
+        <h1 className="relative mt-5 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          Agende sua lavagem
+        </h1>
+        <p className="relative mt-1 text-sm text-blue-100">
+          Monte seu atendimento e veja os horários na hora.
+        </p>
+      </section>
+
+      <div className="my-6 flex items-center justify-center gap-1 sm:gap-2">
+        {steps.map((step, i) => {
+          const active = i === currentStep;
+          return (
+            <div key={step.label} className="flex items-center gap-1 sm:gap-2">
+              <div className="flex flex-col items-center gap-1">
+                <span
+                  className={cn(
+                    'flex size-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
+                    step.done && 'bg-primary text-primary-foreground',
+                    active && 'bg-primary text-primary-foreground ring-4 ring-primary/20',
+                    !step.done && !active && 'bg-secondary text-muted-foreground',
+                  )}
+                >
+                  {step.done ? <Check className="size-4" strokeWidth={3} aria-hidden /> : i + 1}
+                </span>
+                <span
+                  className={cn(
+                    'text-[10px] font-medium sm:text-xs',
+                    step.done || active ? 'text-primary' : 'text-muted-foreground',
+                  )}
+                >
+                  {step.label}
+                </span>
+              </div>
+              {i < steps.length - 1 && (
+                <span
+                  className={cn(
+                    'mb-4 h-0.5 w-6 rounded sm:w-12',
+                    step.done ? 'bg-primary' : 'bg-border',
+                  )}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
         <div className="space-y-8">
