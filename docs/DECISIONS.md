@@ -18,6 +18,7 @@ Formato: [ADR](https://adr.github.io/), simplificado.
 | [ADR-008](#adr-008) | Servidor recalcula preço e duração | Aceito |
 | [ADR-009](#adr-009) | Cancelar e excluir são operações distintas | Aceito |
 | [ADR-010](#adr-010) | Zod como fonte única de validação | Aceito |
+| [ADR-011](#adr-011) | firebase-admin 12 para resolver `ERR_REQUIRE_ESM` na Vercel | Aceito |
 
 ---
 
@@ -33,7 +34,7 @@ O desafio pede separação entre a visão do cliente e a visão administrativa, 
 
 **Decisão**
 
-Monolito Next.js com App Router. A separação cliente/admin usa route groups: `(client)` e `(admin)`.
+Monolito Next.js com App Router. A separação cliente/admin é feita por **rota, com proteção no servidor**: `/agendar` e `/meus-agendamentos` são públicas; `/admin` e as rotas de API sensíveis exigem sessão de administrador (verificada em server components e Route Handlers).
 
 **Alternativas consideradas**
 
@@ -46,14 +47,14 @@ Monolito Next.js com App Router. A separação cliente/admin usa route groups: `
 
 Positivas:
 - Um deploy, um pipeline, zero CORS
-- Route groups dão isolamento de layout e middleware sem custo de infra
+- Separação por rota + verificação de papel no servidor isola a área administrativa sem custo de infra
 - Tipos compartilhados entre front e back sem publicar pacote
 
 Negativas:
 - Acoplamento entre front e back. Se um dia a API precisar servir um app mobile, exigiria extração
 - Menos "impressionante" à primeira vista que um monorepo
 
-**Nota:** a separação que o enunciado pede é de **visão**, não de **deploy**. Route groups atendem ao requisito literal e ao espírito dele.
+**Nota:** a separação que o enunciado pede é de **visão**, não de **deploy**. A separação por rota, com verificação de papel no servidor, atende ao requisito literal e ao espírito dele.
 
 ---
 
@@ -225,10 +226,12 @@ A área administrativa precisa de autenticação. O enunciado pede credenciais n
 
 **Decisão**
 
-Firebase Auth (e-mail/senha) no client. O ID token é trocado por um session cookie httpOnly emitido pelo servidor via `firebase-admin`. Autorização por custom claim `admin: true`.
+Firebase Auth (e-mail/senha) no client. O ID token é trocado por um session cookie httpOnly emitido pelo servidor via `firebase-admin`. Autorização por uma **allowlist de e-mails (`ADMIN_EMAILS`)** lida do ambiente e verificada no servidor.
 
 ```
-Login → ID token → POST /api/auth/session → verifyIdToken → checa claim → session cookie
+Login → ID token → POST /api/session → verifyIdToken → session cookie
+                                                          ↓
+                        guard (requireAdmin): e-mail do cookie ∈ ADMIN_EMAILS?
 ```
 
 **Alternativas consideradas**
@@ -243,9 +246,9 @@ Login → ID token → POST /api/auth/session → verifyIdToken → checa claim 
 
 O ID token expira em 1 hora e fica acessível a JavaScript. O session cookie é `httpOnly`, invisível ao DevTools e a XSS, e permite validar no servidor antes de renderizar, eliminando o flash de conteúdo não autorizado.
 
-**Por que custom claim e não lista de e-mails**
+**Por que allowlist no servidor**
 
-Uma lista de e-mails no front-end é contornável com o DevTools em segundos. A claim é assinada pelo Firebase e verificada no servidor pelo Admin SDK.
+Uma lista de e-mails **no front-end** seria contornável com o DevTools em segundos — mas aqui a `ADMIN_EMAILS` é lida e verificada **exclusivamente no servidor** (em `requireAdmin`, sobre o e-mail do session cookie já validado pelo Firebase). O cliente nunca decide o próprio papel. Para um único operador, uma allowlist server-side é simples e segura; a evolução para **custom claims** (assinadas pelo Firebase) e hierarquia de papéis está registrada como trabalho futuro.
 
 **Consequências**
 
@@ -257,7 +260,7 @@ Positivas:
 Negativas:
 - Dependência de serviço externo
 - Mais variáveis de ambiente
-- `firebase-admin@14` puxa `jose@6` e quebra o build do Next com `ERR_REQUIRE_ESM`. Mitigado com flag `--webpack` no build e override de versão do `jose` no `package.json`. Registrado aqui porque já custou tempo em projeto anterior
+- `firebase-admin@14` puxa `jwks-rsa@4 → jose@6` (ESM-only) e quebra em produção com `ERR_REQUIRE_ESM` no runtime serverless da Vercel, embora funcione no dev local. Resolvido fixando o `firebase-admin@12` (cadeia CommonJS). Ver [ADR-011](#adr-011)
 
 ---
 
@@ -421,6 +424,48 @@ Negativas:
 - Nenhuma relevante. Este é o padrão do ecossistema
 
 **Nota sobre placa:** o regex aceita tanto o padrão antigo (`ABC1234`) quanto Mercosul (`ABC1D23`), que é o comportamento correto no Brasil hoje.
+
+---
+
+## ADR-011
+
+### firebase-admin 12 para resolver `ERR_REQUIRE_ESM` na Vercel
+
+**Status:** Aceito · deploy
+
+**Contexto**
+
+No deploy da Vercel, toda rota que toca o `firebase-admin` (a home, o painel, as rotas de API protegidas) retornava **500** em produção, mesmo com o build passando e tudo funcionando no `pnpm dev` local. O log de runtime apontava:
+
+```
+Error [ERR_REQUIRE_ESM]: require() of ES Module .../jose@6/dist/webapi/index.js
+from .../jwks-rsa@4.1.0/src/utils.js not supported.
+```
+
+A cadeia `firebase-admin@14 → jwks-rsa@4 → jose@6` (ESM-only) é carregada via `require()` no bundle serverless do Turbopack, e o Node do runtime não aceitava esse `require` de ESM.
+
+**Decisão**
+
+Fixar **`firebase-admin@12`**, cuja cadeia usa `jwks-rsa@3 → jose@4` (CommonJS). Sem `require()` de ESM, o erro desaparece na raiz — independente da versão do Node ou do empacotador. O projeto também fixa `engines.node = "22.x"`.
+
+**Alternativas consideradas**
+
+| Alternativa | Por que não |
+|---|---|
+| Subir o Node para 22.x/24.x (que têm `require(esm)`) | Testado: o erro persistiu, porque o `externalImport` do Turbopack não passa pelo `require(esm)` nativo |
+| Override do `jose` para uma versão CommonJS | `jwks-rsa@4` depende da API do `jose@6`; forçar v4 quebraria o `jwks-rsa` |
+| Build com webpack em vez de Turbopack (`--webpack`) | Frágil no Next 16, que assume Turbopack; troca um problema por incerteza |
+
+**Consequências**
+
+Positivas:
+- Correção determinística: elimina a dependência ESM problemática em vez de depender de flags de runtime
+- A API do Admin SDK usada (`cert`, `getAuth`, `verifySessionCookie`, `createSessionCookie`) é idêntica entre a v12 e a v14, então nada no código muda
+
+Negativas:
+- Presa a uma major mais antiga do `firebase-admin`. A atualização para v13+ depende de o ecossistema (Turbopack/Next) lidar melhor com o `require` de ESM
+
+**Nota:** o [ADR-005](#adr-005) previa esse risco (`firebase-admin@14` + `jose@6`), mas a mitigação planejada na época (webpack + override) não se mostrou viável no Next 16 — o fix real foi a v12.
 
 ---
 
