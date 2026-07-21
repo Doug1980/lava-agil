@@ -130,6 +130,16 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
     0,
   );
 
+  // Concluído: mostra só os itens feitos (os desistidos somem). Em andamento, todos.
+  const visibleItems =
+    appointment.status === 'completed'
+      ? appointment.items.filter((item) => item.completed)
+      : appointment.items;
+
+  // Itens só são editáveis enquanto o atendimento está em andamento.
+  const readOnlyItems =
+    trashView || appointment.status === 'completed' || appointment.status === 'cancelled';
+
   // Ao escolher um status no menu: valida o fluxo; se pular etapa, orienta com mensagem.
   function handlePickStatus(to: AppointmentStatus) {
     setMenuOpen(false);
@@ -274,14 +284,14 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
             ) : (
               <span
                 className={cn(
-                  'rounded-full px-2.5 py-0.5 text-xs font-medium',
+                  'rounded-full px-2.5 py-0.5 text-xl font-medium',
                   STATUS_BADGE[appointment.status],
                 )}
               >
                 {appointment.statusLabel}
               </span>
             )}
-            <span className="font-mono text-[11px] tracking-wide text-muted-foreground">
+            <span className="font-mono text-[22px] tracking-wide text-muted-foreground">
               {appointment.code}
             </span>
           </div>
@@ -325,13 +335,13 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
         )}
 
         <ul className="space-y-1 border-t pt-3">
-          {appointment.items.map((item) => (
+          {visibleItems.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
               <label className="flex min-w-0 items-center gap-2">
                 <input
                   type="checkbox"
                   checked={item.completed}
-                  disabled={toggleItem.isPending || trashView}
+                  disabled={toggleItem.isPending || readOnlyItems}
                   onChange={(e) =>
                     toggleItem.mutate({
                       appointmentId: appointment.id,
