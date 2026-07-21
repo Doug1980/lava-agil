@@ -15,6 +15,7 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ConfirmDialog } from '@/components/admin/confirm-dialog';
+import { NoticeDialog } from '@/components/admin/notice-dialog';
 import { ReasonDialog } from '@/components/admin/reason-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
@@ -75,6 +76,31 @@ const CONFIRM_COPY: Partial<Record<AppointmentStatus, { title: string; label: st
   completed: { title: 'Concluir atendimento?', label: 'Concluir' },
 };
 
+/** Ordem do fluxo mostrada no dropdown. */
+const STATUS_FLOW: AppointmentStatus[] = ['scheduled', 'confirmed', 'completed', 'cancelled'];
+
+const STATUS_MENU_ICON: Record<AppointmentStatus, typeof Clock> = {
+  scheduled: Clock,
+  confirmed: CircleCheck,
+  completed: Check,
+  cancelled: Ban,
+};
+
+/**
+ * Valida a troca respeitando o fluxo. Retorna null se permitida, ou a mensagem
+ * de orientação a exibir quando o usuário tenta pular etapas.
+ */
+function transitionGuard(from: AppointmentStatus, to: AppointmentStatus): string | null {
+  if (nextTransitions(from).includes(to)) return null;
+  if (from === 'scheduled' && to === 'completed') {
+    return 'É necessário confirmar primeiro o agendamento para seguir com o status "Concluído".';
+  }
+  if (to === 'scheduled') return 'Não é possível voltar para o status "Agendado".';
+  if (from === 'completed') return 'O atendimento já foi concluído.';
+  if (from === 'cancelled') return 'O agendamento está cancelado.';
+  return 'Essa mudança de status não é permitida.';
+}
+
 export function AppointmentCard({ appointment, showDate = false, trashView = false }: Props) {
   const updateStatus = useUpdateStatus();
   const toggleItem = useToggleItem();
@@ -86,12 +112,22 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
   const [menuOpen, setMenuOpen] = useState(false);
   // Status de destino aguardando confirmação (não destrutivo).
   const [confirmTo, setConfirmTo] = useState<AppointmentStatus | null>(null);
+  // Mensagem de aviso (fluxo pulado) exibida num modal com botão OK.
+  const [notice, setNotice] = useState<string | null>(null);
 
   const transitions = nextTransitions(appointment.status);
 
-  // Ao escolher um status no menu: cancelar abre o modal de motivo; os demais, o de confirmação.
+  // Ao escolher um status no menu: valida o fluxo; se pular etapa, orienta com mensagem.
   function handlePickStatus(to: AppointmentStatus) {
     setMenuOpen(false);
+    if (to === appointment.status) return;
+
+    const guard = transitionGuard(appointment.status, to);
+    if (guard) {
+      setNotice(guard);
+      return;
+    }
+
     if (to === 'cancelled') {
       setCancelOpen(true);
     } else {
@@ -188,32 +224,38 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
                   <ChevronDown className="size-3" aria-hidden />
                 </button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-44 p-1">
+              <PopoverContent align="end" className="w-48 p-1">
                 <p className="px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Alterar para
+                  Fluxo do atendimento
                 </p>
-                {transitions.map((to) => (
-                  <button
-                    key={to}
-                    type="button"
-                    onClick={() => handlePickStatus(to)}
-                    className={cn(
-                      'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
-                      to === 'cancelled'
-                        ? 'text-destructive hover:bg-destructive/10'
-                        : 'hover:bg-muted',
-                    )}
-                  >
-                    {to === 'cancelled' ? (
-                      <Ban className="size-4" aria-hidden />
-                    ) : to === 'completed' ? (
-                      <Check className="size-4" aria-hidden />
-                    ) : (
-                      <CircleCheck className="size-4" aria-hidden />
-                    )}
-                    {STATUS_LABELS[to]}
-                  </button>
-                ))}
+                {STATUS_FLOW.map((s) => {
+                  const isCurrent = s === appointment.status;
+                  const Icon = STATUS_MENU_ICON[s];
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      disabled={isCurrent}
+                      onClick={() => handlePickStatus(s)}
+                      className={cn(
+                        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                        isCurrent
+                          ? 'text-muted-foreground'
+                          : s === 'cancelled'
+                            ? 'text-destructive hover:bg-destructive/10'
+                            : 'hover:bg-muted',
+                      )}
+                    >
+                      <Icon className="size-4" aria-hidden />
+                      {STATUS_LABELS[s]}
+                      {isCurrent && (
+                        <span className="ml-auto text-[10px] font-medium uppercase tracking-wide">
+                          atual
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </PopoverContent>
             </Popover>
           ) : (
@@ -402,6 +444,14 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
       }
       pending={pendingTo === confirmTo}
       onConfirm={() => confirmTo && runTransition(confirmTo)}
+    />
+
+    <NoticeDialog
+      open={notice !== null}
+      onOpenChange={(o) => {
+        if (!o) setNotice(null);
+      }}
+      message={notice ?? ''}
     />
     </>
   );
