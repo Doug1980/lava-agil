@@ -7,19 +7,26 @@ import type { Appointment, AppointmentStatus } from '@/types/api';
 type Filters = {
   date?: string;
   status?: AppointmentStatus;
+  period?: 'day' | 'month';
 };
 
 function buildQuery(filters: Filters): string {
   const params = new URLSearchParams();
   if (filters.date) params.set('date', filters.date);
   if (filters.status) params.set('status', filters.status);
+  if (filters.period) params.set('period', filters.period);
   const qs = params.toString();
   return qs ? `?${qs}` : '';
 }
 
 export function useAppointments(filters: Filters) {
   return useQuery({
-    queryKey: ['appointments', filters.date ?? null, filters.status ?? null],
+    queryKey: [
+      'appointments',
+      filters.date ?? null,
+      filters.status ?? null,
+      filters.period ?? 'day',
+    ],
     queryFn: () => apiFetch<Appointment[]>(`/api/appointments${buildQuery(filters)}`),
     staleTime: 15_000,
   });

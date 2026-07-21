@@ -47,14 +47,29 @@ export async function findAppointmentById(id: string) {
   return appointment ?? null;
 }
 
-export async function listAppointments(filters: { date?: string; status?: AppointmentStatus }) {
+export async function listAppointments(filters: {
+  date?: string;
+  status?: AppointmentStatus;
+  period?: 'day' | 'month';
+}) {
   const db = getDb();
   const conditions = [];
 
   if (filters.date) {
-    const dayStart = zonedAt(filters.date, '00:00');
-    const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-    conditions.push(lt(appointments.startsAt, dayEnd), gt(appointments.endsAt, dayStart));
+    if (filters.period === 'month') {
+      // Intervalo do mês da data informada (fuso do estabelecimento).
+      const [year, month] = filters.date.split('-').map(Number);
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const nextYear = month === 12 ? year + 1 : year;
+      const nextMonth = month === 12 ? 1 : month + 1;
+      const monthStart = zonedAt(`${year}-${pad(month)}-01`, '00:00');
+      const monthEnd = zonedAt(`${nextYear}-${pad(nextMonth)}-01`, '00:00');
+      conditions.push(lt(appointments.startsAt, monthEnd), gt(appointments.endsAt, monthStart));
+    } else {
+      const dayStart = zonedAt(filters.date, '00:00');
+      const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+      conditions.push(lt(appointments.startsAt, dayEnd), gt(appointments.endsAt, dayStart));
+    }
   }
 
   if (filters.status) {

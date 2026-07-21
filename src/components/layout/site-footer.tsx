@@ -61,7 +61,7 @@ export function SiteFooter() {
           </p>
           <p className="mt-1.5 flex items-center gap-1.5 text-xs">
             <MessageSquareOff className="size-3.5 shrink-0 text-[#3b8bee]" aria-hidden />
-            Fechado as segundas-feiras
+            Fechado às segundas-feiras
           </p>
         </div>
       </div>

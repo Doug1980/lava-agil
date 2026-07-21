@@ -47,6 +47,8 @@ export const updateStatusSchema = z.object({
 export const listAppointmentsQuerySchema = z.object({
   date: z.iso.date().optional(),
   status: appointmentStatusSchema.optional(),
+  // Recorte de tempo: dia da data informada (padrão) ou o mês inteiro dela.
+  period: z.enum(['day', 'month']).optional().default('day'),
 });
 
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
