@@ -142,6 +142,18 @@
   h6 {
     @apply font-heading;
   }
+  /* Tailwind v4 zera o cursor dos botões: reativa o ponteiro nos elementos
+     interativos habilitados (botões, cards-botão, pílulas). */
+  button:not(:disabled),
+  [role="button"],
+  [role="radio"],
+  [role="checkbox"] {
+    cursor: pointer;
+  }
+  /* Separado para o :has não invalidar a lista acima em parsers antigos. */
+  label:has(> input[type="checkbox"]:not(:disabled)) {
+    cursor: pointer;
+  }
 }
 
 /* Animações de seleção dos cards */

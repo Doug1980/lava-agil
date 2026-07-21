@@ -23,7 +23,7 @@ export function DatePicker({ value, onChange }: Props) {
         <button
           type="button"
           className={cn(
-            'flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-all duration-200',
+            'flex w-full cursor-pointer items-center gap-3 rounded-xl border p-4 text-left transition-all duration-200',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
             value
               ? 'animate-card-select scale-[1.02] border-primary bg-primary text-primary-foreground shadow-xl shadow-primary/40'

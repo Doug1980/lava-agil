@@ -65,6 +65,9 @@ export const appointments = pgTable(
     notes: text('notes'),
     // Motivo do cancelamento (preenchido pelo admin ao cancelar).
     cancelReason: text('cancel_reason'),
+    // Soft-delete: quando preenchido, o registro some das listas mas continua no banco.
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+    deleteReason: text('delete_reason'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('appointments_starts_at_idx').on(t.startsAt)],

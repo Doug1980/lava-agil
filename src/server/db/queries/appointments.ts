@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, inArray, lt, ne, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, lt, ne, sql } from 'drizzle-orm';
 import type { AppointmentStatus } from '@/lib/schemas/appointment';
 import { getDb } from '@/server/db';
 import { appointmentItems, appointments } from '@/server/db/schema';
@@ -18,6 +18,7 @@ export async function findActiveBookings(date: string): Promise<BookedRange[]> {
     .where(
       and(
         ne(appointments.status, 'cancelled'),
+        isNull(appointments.deletedAt),
         lt(appointments.startsAt, dayEnd),
         gt(appointments.endsAt, dayStart),
       ),
@@ -30,7 +31,7 @@ export async function findAppointmentsByCodes(codes: string[]) {
   if (codes.length === 0) return [];
 
   return db.query.appointments.findMany({
-    where: inArray(appointments.code, codes),
+    where: and(inArray(appointments.code, codes), isNull(appointments.deletedAt)),
     with: { items: true },
     orderBy: [asc(appointments.startsAt)],
   });
@@ -40,7 +41,7 @@ export async function findAppointmentById(id: string) {
   const db = getDb();
 
   const appointment = await db.query.appointments.findFirst({
-    where: eq(appointments.id, id),
+    where: and(eq(appointments.id, id), isNull(appointments.deletedAt)),
     with: { items: true },
   });
 
@@ -51,9 +52,13 @@ export async function listAppointments(filters: {
   date?: string;
   status?: AppointmentStatus;
   period?: 'day' | 'month';
+  deleted?: boolean;
 }) {
   const db = getDb();
-  const conditions = [];
+  // Visão normal esconde excluídos; a "lixeira" mostra só os excluídos.
+  const conditions = [
+    filters.deleted ? isNotNull(appointments.deletedAt) : isNull(appointments.deletedAt),
+  ];
 
   if (filters.date) {
     if (filters.period === 'month') {
@@ -72,14 +77,15 @@ export async function listAppointments(filters: {
     }
   }
 
-  if (filters.status) {
+  if (!filters.deleted && filters.status) {
     conditions.push(eq(appointments.status, filters.status));
   }
 
   return db.query.appointments.findMany({
-    where: conditions.length ? and(...conditions) : undefined,
+    where: and(...conditions),
     with: { items: true },
-    orderBy: [asc(appointments.startsAt)],
+    // Na lixeira, os mais recentemente excluídos primeiro; caso contrário, por horário.
+    orderBy: filters.deleted ? [desc(appointments.deletedAt)] : [asc(appointments.startsAt)],
   });
 }
 
@@ -95,9 +101,36 @@ export async function updateStatus(id: string, status: AppointmentStatus, reason
   return row ?? null;
 }
 
-export async function deleteAppointment(id: string) {
+/**
+ * Exclusão "suave": marca o registro como excluído e guarda o motivo.
+ * A linha some das listas mas continua no banco (recuperável) e libera o
+ * horário — a constraint de exclusão temporal ignora `deleted_at IS NOT NULL`.
+ */
+export async function deleteAppointment(id: string, reason: string) {
   const db = getDb();
-  const [row] = await db.delete(appointments).where(eq(appointments.id, id)).returning();
+  const [row] = await db
+    .update(appointments)
+    .set({ deletedAt: sql`now()`, deleteReason: reason })
+    .where(and(eq(appointments.id, id), isNull(appointments.deletedAt)))
+    .returning();
+  return row ?? null;
+}
+
+/** Código de erro do Postgres para violação de constraint de exclusão (overlap). */
+export const OVERLAP_ERROR_CODE = '23P01';
+
+/**
+ * Restaura um agendamento excluído (zera deleted_at/motivo). Pode falhar com
+ * OVERLAP_ERROR_CODE se o horário já tiver sido reservado por outro no meio-tempo
+ * — nesse caso a constraint de agenda barra e o chamador deve tratar.
+ */
+export async function restoreAppointment(id: string) {
+  const db = getDb();
+  const [row] = await db
+    .update(appointments)
+    .set({ deletedAt: null, deleteReason: null })
+    .where(and(eq(appointments.id, id), isNotNull(appointments.deletedAt)))
+    .returning();
   return row ?? null;
 }
 

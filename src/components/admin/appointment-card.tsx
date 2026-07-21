@@ -1,10 +1,15 @@
 'use client';
 
-import { Ban, Car, Clock, Loader2, Phone, Trash2 } from 'lucide-react';
+import { Ban, Car, Clock, Loader2, Phone, RotateCcw, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CancelDialog } from '@/components/admin/cancel-dialog';
-import { useDeleteAppointment, useToggleItem, useUpdateStatus } from '@/hooks/use-appointments';
+import { ReasonDialog } from '@/components/admin/reason-dialog';
+import {
+  useDeleteAppointment,
+  useRestoreAppointment,
+  useToggleItem,
+  useUpdateStatus,
+} from '@/hooks/use-appointments';
 import { ApiClientError } from '@/lib/api-client';
 import { TIMEZONE } from '@/lib/constants';
 import { formatCurrency, formatDuration, formatTimeRange, maskPhone } from '@/lib/format';
@@ -13,10 +18,21 @@ import { ACTION_LABEL, isDestructive, STATUS_BADGE } from '@/lib/status-ui';
 import { cn } from '@/lib/utils';
 import type { Appointment, AppointmentStatus } from '@/types/api';
 
+const CANCEL_PRESETS = ['Cliente desistiu', 'Não compareceu', 'Remarcado', 'Clima', 'Outro'] as const;
+const DELETE_PRESETS = [
+  'Duplicado',
+  'Lançamento de teste',
+  'Engano',
+  'A pedido do cliente',
+  'Outro',
+] as const;
+
 type Props = {
   appointment: Appointment;
   /** Mostra a data no card (útil na visão de mês, com dias variados). */
   showDate?: boolean;
+  /** Modo lixeira: exibe o motivo da exclusão e o botão Restaurar. */
+  trashView?: boolean;
 };
 
 /** Data curta "21/07 · ter" no fuso do estabelecimento. */
@@ -29,12 +45,25 @@ function formatCardDate(iso: string): string {
   });
 }
 
-export function AppointmentCard({ appointment, showDate = false }: Props) {
+/** Data + hora "21/07 14:30" para o registro de exclusão. */
+function formatDeletedAt(iso: string): string {
+  return new Date(iso).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: TIMEZONE,
+  });
+}
+
+export function AppointmentCard({ appointment, showDate = false, trashView = false }: Props) {
   const updateStatus = useUpdateStatus();
   const toggleItem = useToggleItem();
   const deleteAppointment = useDeleteAppointment();
+  const restoreAppointment = useRestoreAppointment();
   const [pendingTo, setPendingTo] = useState<AppointmentStatus | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const transitions = nextTransitions(appointment.status);
 
@@ -68,17 +97,30 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
     );
   }
 
-  function handleDelete() {
-    const ok = window.confirm(
-      `Excluir permanentemente o agendamento ${appointment.code} de ${appointment.customer.name}? Esta ação não pode ser desfeita.`,
+  function runDelete(reason: string) {
+    deleteAppointment.mutate(
+      { id: appointment.id, reason },
+      {
+        onSuccess: () => {
+          toast.success('Agendamento excluído.');
+          setDeleteOpen(false);
+        },
+        onError: (err) => {
+          const msg =
+            err instanceof ApiClientError ? err.message : 'Não foi possível excluir o agendamento.';
+          toast.error(msg);
+        },
+      },
     );
-    if (!ok) return;
+  }
 
-    deleteAppointment.mutate(appointment.id, {
-      onSuccess: () => toast.success('Agendamento excluído.'),
+  function handleRestore() {
+    restoreAppointment.mutate(appointment.id, {
+      onSuccess: () => toast.success('Agendamento restaurado.'),
       onError: (err) => {
+        // A API devolve mensagem clara se o horário já tiver sido reservado.
         const msg =
-          err instanceof ApiClientError ? err.message : 'Não foi possível excluir o agendamento.';
+          err instanceof ApiClientError ? err.message : 'Não foi possível restaurar o agendamento.';
         toast.error(msg);
       },
     });
@@ -130,11 +172,22 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
         </p>
       </div>
 
-      {appointment.status === 'cancelled' && appointment.cancelReason && (
+      {!trashView && appointment.status === 'cancelled' && appointment.cancelReason && (
         <div className="flex items-start gap-2 rounded-lg bg-destructive/5 px-3 py-2 text-sm text-destructive">
           <Ban className="mt-0.5 size-4 shrink-0" aria-hidden />
           <span>
             <span className="font-medium">Motivo:</span> {appointment.cancelReason}
+          </span>
+        </div>
+      )}
+
+      {trashView && (
+        <div className="flex items-start gap-2 rounded-lg bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          <Trash2 className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            <span className="font-medium">Excluído</span>
+            {appointment.deletedAt && ` em ${formatDeletedAt(appointment.deletedAt)}`}
+            {appointment.deleteReason && ` — ${appointment.deleteReason}`}
           </span>
         </div>
       )}
@@ -146,7 +199,7 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
               <input
                 type="checkbox"
                 checked={item.completed}
-                disabled={toggleItem.isPending}
+                disabled={toggleItem.isPending || trashView}
                 onChange={(e) =>
                   toggleItem.mutate({
                     appointmentId: appointment.id,
@@ -174,56 +227,103 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
           {formatCurrency(appointment.totalPriceCents)}
         </span>
 
-        <div className="flex items-center gap-2">
-          {transitions.map((to) => (
-            <button
-              key={to}
-              type="button"
-              disabled={updateStatus.isPending}
-              onClick={() => handleTransition(to)}
-              className={cn(
-                'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                'disabled:pointer-events-none disabled:opacity-60',
-                isDestructive(to)
-                  ? 'border-destructive/40 text-destructive hover:bg-destructive/10'
-                  : 'border-primary/40 text-primary hover:bg-primary/10',
-              )}
-            >
-              {pendingTo === to && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
-              {ACTION_LABEL[to]}
-            </button>
-          ))}
-
+        {trashView ? (
           <button
             type="button"
-            onClick={handleDelete}
-            disabled={deleteAppointment.isPending}
-            aria-label={`Excluir agendamento ${appointment.code}`}
-            title="Excluir"
+            onClick={handleRestore}
+            disabled={restoreAppointment.isPending}
             className={cn(
-              'flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors',
-              'hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'flex items-center gap-1.5 rounded-lg border border-primary/40 px-3 py-1.5 text-sm font-medium text-primary transition-colors',
+              'hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               'disabled:pointer-events-none disabled:opacity-60',
             )}
           >
-            {deleteAppointment.isPending ? (
+            {restoreAppointment.isPending ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />
             ) : (
-              <Trash2 className="size-4" aria-hidden />
+              <RotateCcw className="size-4" aria-hidden />
             )}
+            Restaurar
           </button>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            {transitions.map((to) => (
+              <button
+                key={to}
+                type="button"
+                disabled={updateStatus.isPending}
+                onClick={() => handleTransition(to)}
+                className={cn(
+                  'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'disabled:pointer-events-none disabled:opacity-60',
+                  isDestructive(to)
+                    ? 'border-destructive/40 text-destructive hover:bg-destructive/10'
+                    : 'border-primary/40 text-primary hover:bg-primary/10',
+                )}
+              >
+                {pendingTo === to && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
+                {ACTION_LABEL[to]}
+              </button>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => setDeleteOpen(true)}
+              disabled={deleteAppointment.isPending}
+              aria-label={`Excluir agendamento ${appointment.code}`}
+              title="Excluir"
+              className={cn(
+                'flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors',
+                'hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                'disabled:pointer-events-none disabled:opacity-60',
+              )}
+            >
+              {deleteAppointment.isPending ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <Trash2 className="size-4" aria-hidden />
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
 
-    <CancelDialog
+    <ReasonDialog
       open={cancelOpen}
       onOpenChange={setCancelOpen}
-      customerName={appointment.customer.name}
+      title="Cancelar agendamento?"
+      description={
+        <>
+          O horário de{' '}
+          <span className="font-medium text-foreground">{appointment.customer.name}</span> será
+          liberado. Informe o motivo — ele fica registrado no histórico.
+        </>
+      }
+      presets={CANCEL_PRESETS}
+      confirmLabel="Sim, cancelar"
       pending={pendingTo === 'cancelled'}
       onConfirm={(reason) => runTransition('cancelled', reason)}
+    />
+
+    <ReasonDialog
+      open={deleteOpen}
+      onOpenChange={setDeleteOpen}
+      title="Excluir agendamento?"
+      description={
+        <>
+          O agendamento{' '}
+          <span className="font-medium text-foreground">{appointment.code}</span> de{' '}
+          <span className="font-medium text-foreground">{appointment.customer.name}</span> sairá das
+          listas. Ele fica guardado e pode ser recuperado. Informe o motivo.
+        </>
+      }
+      presets={DELETE_PRESETS}
+      confirmLabel="Sim, excluir"
+      pending={deleteAppointment.isPending}
+      onConfirm={(reason) => runDelete(reason)}
     />
     </>
   );

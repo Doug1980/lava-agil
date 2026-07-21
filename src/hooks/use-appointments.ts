@@ -8,6 +8,7 @@ type Filters = {
   date?: string;
   status?: AppointmentStatus;
   period?: 'day' | 'month';
+  deleted?: boolean;
 };
 
 function buildQuery(filters: Filters): string {
@@ -15,6 +16,7 @@ function buildQuery(filters: Filters): string {
   if (filters.date) params.set('date', filters.date);
   if (filters.status) params.set('status', filters.status);
   if (filters.period) params.set('period', filters.period);
+  if (filters.deleted) params.set('deleted', 'true');
   const qs = params.toString();
   return qs ? `?${qs}` : '';
 }
@@ -26,9 +28,19 @@ export function useAppointments(filters: Filters) {
       filters.date ?? null,
       filters.status ?? null,
       filters.period ?? 'day',
+      filters.deleted ?? false,
     ],
     queryFn: () => apiFetch<Appointment[]>(`/api/appointments${buildQuery(filters)}`),
     staleTime: 15_000,
+  });
+}
+
+export function useRestoreAppointment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<Appointment>(`/api/appointments/${id}/restore`, { method: 'POST' }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['appointments'] }),
   });
 }
 
@@ -78,7 +90,11 @@ export function useToggleItem() {
 export function useDeleteAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => apiFetch<void>(`/api/appointments/${id}`, { method: 'DELETE' }),
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      apiFetch<void>(`/api/appointments/${id}`, {
+        method: 'DELETE',
+        body: JSON.stringify({ reason }),
+      }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['appointments'] }),
   });
 }

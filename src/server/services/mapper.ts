@@ -25,6 +25,8 @@ type AppointmentRow = {
   status: keyof typeof STATUS_LABELS;
   notes: string | null;
   cancelReason?: string | null;
+  deletedAt?: Date | null;
+  deleteReason?: string | null;
   createdAt: Date;
   items?: ItemRow[];
 };
@@ -76,6 +78,8 @@ export function toAppointmentResponse(row: AppointmentRow) {
     statusLabel: STATUS_LABELS[row.status],
     notes: row.notes,
     cancelReason: row.cancelReason ?? null,
+    deletedAt: row.deletedAt ? row.deletedAt.toISOString() : null,
+    deleteReason: row.deleteReason ?? null,
     createdAt: row.createdAt.toISOString(),
     items: (row.items ?? []).map((i) => ({
       id: i.id,

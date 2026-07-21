@@ -1,21 +1,40 @@
 'use client';
 
-import { CalendarDays, CheckCircle2, Inbox, Search, TriangleAlert, Wallet } from 'lucide-react';
+import {
+  CalendarDays,
+  CheckCircle2,
+  Inbox,
+  Search,
+  Trash2,
+  TriangleAlert,
+  Wallet,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { AppointmentCard } from '@/components/admin/appointment-card';
 import { useAppointments } from '@/hooks/use-appointments';
-import { STATUS_LABELS } from '@/lib/constants';
 import { formatCurrency, formatLongDate, toDateKey } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { AppointmentStatus } from '@/types/api';
 
-const STATUS_OPTIONS: (AppointmentStatus | 'all')[] = [
+type StatusFilter = AppointmentStatus | 'all' | 'deleted';
+
+const STATUS_OPTIONS: StatusFilter[] = [
   'all',
   'scheduled',
   'confirmed',
   'completed',
   'cancelled',
+  'deleted',
 ];
+
+const STATUS_FILTER_LABEL: Record<StatusFilter, string> = {
+  all: 'Todos',
+  scheduled: 'Agendado',
+  confirmed: 'Confirmado',
+  completed: 'Concluído',
+  cancelled: 'Cancelado',
+  deleted: 'Excluídos',
+};
 
 /** Rótulo "Mês de Ano" a partir da data (ex.: "Julho de 2026"). */
 function monthLabel(dateKey: string): string {
@@ -28,14 +47,17 @@ function monthLabel(dateKey: string): string {
 
 export function AdminDashboard() {
   const [date, setDate] = useState(() => toDateKey(new Date()));
-  const [status, setStatus] = useState<AppointmentStatus | 'all'>('all');
+  const [status, setStatus] = useState<StatusFilter>('all');
   const [period, setPeriod] = useState<'day' | 'month'>('day');
   const [search, setSearch] = useState('');
 
+  const isTrash = status === 'deleted';
+
   const query = useAppointments({
     date,
-    status: status === 'all' ? undefined : status,
+    status: status === 'all' || status === 'deleted' ? undefined : status,
     period,
+    deleted: isTrash,
   });
 
   // Busca client-side por nome do cliente ou código.
@@ -69,31 +91,33 @@ export function AdminDashboard() {
         </p>
       </header>
 
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        <div className="rounded-xl border bg-card p-4 shadow-md shadow-primary/5">
-          <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <CalendarDays className="size-3.5 text-primary" aria-hidden />
-            Total
+      {!isTrash && (
+        <div className="mb-6 grid grid-cols-3 gap-3">
+          <div className="rounded-xl border bg-card p-4 shadow-md shadow-primary/5">
+            <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <CalendarDays className="size-3.5 text-primary" aria-hidden />
+              Total
+            </div>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{summary.total}</p>
           </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums">{summary.total}</p>
-        </div>
-        <div className="rounded-xl border bg-card p-4 shadow-md shadow-primary/5">
-          <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <Wallet className="size-3.5 text-primary" aria-hidden />
-            Faturamento
+          <div className="rounded-xl border bg-card p-4 shadow-md shadow-primary/5">
+            <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <Wallet className="size-3.5 text-primary" aria-hidden />
+              Faturamento
+            </div>
+            <p className="mt-1 text-2xl font-bold tabular-nums">
+              {formatCurrency(summary.revenueCents)}
+            </p>
           </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums">
-            {formatCurrency(summary.revenueCents)}
-          </p>
-        </div>
-        <div className="rounded-xl border bg-card p-4 shadow-md shadow-primary/5">
-          <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <CheckCircle2 className="size-3.5 text-primary" aria-hidden />
-            Concluídos
+          <div className="rounded-xl border bg-card p-4 shadow-md shadow-primary/5">
+            <div className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <CheckCircle2 className="size-3.5 text-primary" aria-hidden />
+              Concluídos
+            </div>
+            <p className="mt-1 text-2xl font-bold tabular-nums">{summary.completed}</p>
           </div>
-          <p className="mt-1 text-2xl font-bold tabular-nums">{summary.completed}</p>
         </div>
-      </div>
+      )}
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex rounded-lg border bg-card p-0.5 shadow-sm">
@@ -136,23 +160,31 @@ export function AdminDashboard() {
         </label>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-1.5">
+      <div className="mb-6 flex flex-wrap items-center gap-1.5">
         {STATUS_OPTIONS.map((opt) => {
           const active = status === opt;
+          const trash = opt === 'deleted';
           return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => setStatus(opt)}
-              className={cn(
-                'rounded-full border px-3 py-1 text-xs font-medium transition-all',
-                active
-                  ? 'border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30'
-                  : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
-              )}
-            >
-              {opt === 'all' ? 'Todos' : STATUS_LABELS[opt]}
-            </button>
+            <div key={opt} className={cn('flex items-center gap-1.5', trash && 'ml-auto')}>
+              {trash && <span className="mx-1 h-4 w-px bg-border" aria-hidden />}
+              <button
+                type="button"
+                onClick={() => setStatus(opt)}
+                className={cn(
+                  'flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-all',
+                  active && trash
+                    ? 'border-destructive bg-destructive text-white shadow-sm shadow-destructive/30'
+                    : active
+                      ? 'border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30'
+                      : trash
+                        ? 'border-border bg-card text-muted-foreground hover:border-destructive/50 hover:text-destructive'
+                        : 'border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground',
+                )}
+              >
+                {trash && <Trash2 className="size-3.5" aria-hidden />}
+                {STATUS_FILTER_LABEL[opt]}
+              </button>
+            </div>
           );
         })}
       </div>
@@ -188,7 +220,11 @@ export function AdminDashboard() {
               className="animate-rise"
               style={{ animationDelay: `${i * 50}ms` }}
             >
-              <AppointmentCard appointment={appointment} showDate={period === 'month'} />
+              <AppointmentCard
+                appointment={appointment}
+                showDate={period === 'month'}
+                trashView={isTrash}
+              />
             </div>
           ))}
         </div>
@@ -198,7 +234,9 @@ export function AdminDashboard() {
           <p className="text-sm text-muted-foreground">
             {search.trim()
               ? 'Nenhum agendamento corresponde à busca.'
-              : 'Nenhum agendamento para este filtro.'}
+              : isTrash
+                ? 'A lixeira está vazia.'
+                : 'Nenhum agendamento para este filtro.'}
           </p>
         </div>
       )}

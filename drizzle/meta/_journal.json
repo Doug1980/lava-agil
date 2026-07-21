@@ -15,6 +15,13 @@
       "when": 1784634651697,
       "tag": "0001_colorful_imperial_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784636642239,
+      "tag": "0002_adorable_nova",
+      "breakpoints": true
     }
   ]
 }

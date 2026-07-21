@@ -50,11 +50,20 @@ export const updateStatusSchema = z
     path: ['reason'],
   });
 
+export const deleteAppointmentSchema = z.object({
+  reason: z.string().trim().min(1, 'Informe o motivo da exclusão.').max(500),
+});
+
 export const listAppointmentsQuerySchema = z.object({
   date: z.iso.date().optional(),
   status: appointmentStatusSchema.optional(),
   // Recorte de tempo: dia da data informada (padrão) ou o mês inteiro dela.
   period: z.enum(['day', 'month']).optional().default('day'),
+  // Quando true, retorna a "lixeira" (só os excluídos).
+  deleted: z
+    .enum(['true', 'false'])
+    .optional()
+    .transform((v) => v === 'true'),
 });
 
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
