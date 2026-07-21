@@ -35,10 +35,18 @@ export function useAppointments(filters: Filters) {
 export function useUpdateStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: AppointmentStatus }) =>
+    mutationFn: ({
+      id,
+      status,
+      reason,
+    }: {
+      id: string;
+      status: AppointmentStatus;
+      reason?: string;
+    }) =>
       apiFetch<Appointment>(`/api/appointments/${id}/status`, {
         method: 'PATCH',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, reason }),
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['appointments'] }),
   });

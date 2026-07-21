@@ -63,6 +63,8 @@ export const appointments = pgTable(
     totalPriceCents: integer('total_price_cents').notNull(),
     status: appointmentStatusEnum('status').notNull().default('scheduled'),
     notes: text('notes'),
+    // Motivo do cancelamento (preenchido pelo admin ao cancelar).
+    cancelReason: text('cancel_reason'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('appointments_starts_at_idx').on(t.startsAt)],

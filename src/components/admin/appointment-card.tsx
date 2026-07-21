@@ -1,8 +1,9 @@
 'use client';
 
-import { Car, Clock, Loader2, Phone, Trash2 } from 'lucide-react';
+import { Ban, Car, Clock, Loader2, Phone, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { CancelDialog } from '@/components/admin/cancel-dialog';
 import { useDeleteAppointment, useToggleItem, useUpdateStatus } from '@/hooks/use-appointments';
 import { ApiClientError } from '@/lib/api-client';
 import { TIMEZONE } from '@/lib/constants';
@@ -33,21 +34,30 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
   const toggleItem = useToggleItem();
   const deleteAppointment = useDeleteAppointment();
   const [pendingTo, setPendingTo] = useState<AppointmentStatus | null>(null);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const transitions = nextTransitions(appointment.status);
 
   function handleTransition(to: AppointmentStatus) {
+    // Cancelar abre o diálogo com motivo; demais transições vão direto.
     if (isDestructive(to)) {
-      const ok = window.confirm(
-        `Cancelar o agendamento de ${appointment.customer.name}? Essa ação libera o horário.`,
-      );
-      if (!ok) return;
+      setCancelOpen(true);
+      return;
     }
+    runTransition(to);
+  }
 
+  function runTransition(to: AppointmentStatus, reason?: string) {
     setPendingTo(to);
     updateStatus.mutate(
-      { id: appointment.id, status: to },
+      { id: appointment.id, status: to, reason },
       {
+        onSuccess: () => {
+          if (to === 'cancelled') {
+            toast.success('Agendamento cancelado.');
+            setCancelOpen(false);
+          }
+        },
         onError: (err) => {
           const msg =
             err instanceof ApiClientError ? err.message : 'Não foi possível mudar o status.';
@@ -75,6 +85,7 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
   }
 
   return (
+    <>
     <div className="space-y-3 rounded-xl border bg-card p-4 shadow-md shadow-primary/5 transition-shadow hover:shadow-lg hover:shadow-primary/10">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -118,6 +129,15 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
           {maskPhone(appointment.customer.phone)}
         </p>
       </div>
+
+      {appointment.status === 'cancelled' && appointment.cancelReason && (
+        <div className="flex items-start gap-2 rounded-lg bg-destructive/5 px-3 py-2 text-sm text-destructive">
+          <Ban className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span>
+            <span className="font-medium">Motivo:</span> {appointment.cancelReason}
+          </span>
+        </div>
+      )}
 
       <ul className="space-y-1 border-t pt-3">
         {appointment.items.map((item) => (
@@ -197,5 +217,14 @@ export function AppointmentCard({ appointment, showDate = false }: Props) {
         </div>
       </div>
     </div>
+
+    <CancelDialog
+      open={cancelOpen}
+      onOpenChange={setCancelOpen}
+      customerName={appointment.customer.name}
+      pending={pendingTo === 'cancelled'}
+      onConfirm={(reason) => runTransition('cancelled', reason)}
+    />
+    </>
   );
 }

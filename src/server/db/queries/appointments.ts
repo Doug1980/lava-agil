@@ -83,11 +83,13 @@ export async function listAppointments(filters: {
   });
 }
 
-export async function updateStatus(id: string, status: AppointmentStatus) {
+export async function updateStatus(id: string, status: AppointmentStatus, reason?: string) {
   const db = getDb();
+  // Cancelar registra o motivo; qualquer outra transição limpa um motivo antigo.
+  const cancelReason = status === 'cancelled' ? (reason ?? null) : null;
   const [row] = await db
     .update(appointments)
-    .set({ status })
+    .set({ status, cancelReason })
     .where(eq(appointments.id, id))
     .returning();
   return row ?? null;

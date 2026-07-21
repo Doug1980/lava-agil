@@ -57,6 +57,7 @@ export type Appointment = {
   status: AppointmentStatus;
   statusLabel: string;
   notes: string | null;
+  cancelReason: string | null;
   createdAt: string;
   items: AppointmentItem[];
 };

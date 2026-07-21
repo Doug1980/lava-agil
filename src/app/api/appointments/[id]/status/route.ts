@@ -12,13 +12,13 @@ export async function PATCH(request: Request, { params }: Params) {
   try {
     await requireAdmin();
     const { id } = z.object({ id: z.uuid() }).parse(await params);
-    const { status } = updateStatusSchema.parse(await request.json());
+    const { status, reason } = updateStatusSchema.parse(await request.json());
 
     const current = await findAppointmentById(id);
     if (!current) return fail('NOT_FOUND', 'Agendamento não encontrado.', 404);
 
     assertTransition(current.status, status);
-    await updateStatus(id, status);
+    await updateStatus(id, status, reason);
 
     const updated = await findAppointmentById(id);
     return json(toAppointmentResponse(updated!));

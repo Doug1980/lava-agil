@@ -40,9 +40,15 @@ export const servicesQuerySchema = z.object({
   vehicleSize: vehicleSizeSchema,
 });
 
-export const updateStatusSchema = z.object({
-  status: appointmentStatusSchema,
-});
+export const updateStatusSchema = z
+  .object({
+    status: appointmentStatusSchema,
+    reason: z.string().trim().max(500).optional(),
+  })
+  .refine((data) => data.status !== 'cancelled' || Boolean(data.reason && data.reason.length > 0), {
+    message: 'Informe o motivo do cancelamento.',
+    path: ['reason'],
+  });
 
 export const listAppointmentsQuerySchema = z.object({
   date: z.iso.date().optional(),
