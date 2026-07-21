@@ -1,9 +1,22 @@
 'use client';
 
-import { Ban, Car, Clock, Loader2, Phone, RotateCcw, Trash2 } from 'lucide-react';
+import {
+  Ban,
+  Car,
+  Check,
+  ChevronDown,
+  CircleCheck,
+  Clock,
+  Loader2,
+  Phone,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/admin/confirm-dialog';
 import { ReasonDialog } from '@/components/admin/reason-dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   useDeleteAppointment,
   useRestoreAppointment,
@@ -11,10 +24,10 @@ import {
   useUpdateStatus,
 } from '@/hooks/use-appointments';
 import { ApiClientError } from '@/lib/api-client';
-import { TIMEZONE } from '@/lib/constants';
+import { STATUS_LABELS, TIMEZONE } from '@/lib/constants';
 import { formatCurrency, formatDuration, formatTimeRange, maskPhone } from '@/lib/format';
 import { nextTransitions } from '@/lib/status';
-import { ACTION_LABEL, isDestructive, STATUS_BADGE } from '@/lib/status-ui';
+import { STATUS_BADGE } from '@/lib/status-ui';
 import { cn } from '@/lib/utils';
 import type { Appointment, AppointmentStatus } from '@/types/api';
 
@@ -56,6 +69,12 @@ function formatDeletedAt(iso: string): string {
   });
 }
 
+/** Texto do diálogo de confirmação por status de destino (não destrutivo). */
+const CONFIRM_COPY: Partial<Record<AppointmentStatus, { title: string; label: string }>> = {
+  confirmed: { title: 'Confirmar agendamento?', label: 'Confirmar' },
+  completed: { title: 'Concluir atendimento?', label: 'Concluir' },
+};
+
 export function AppointmentCard({ appointment, showDate = false, trashView = false }: Props) {
   const updateStatus = useUpdateStatus();
   const toggleItem = useToggleItem();
@@ -64,16 +83,20 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
   const [pendingTo, setPendingTo] = useState<AppointmentStatus | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  // Status de destino aguardando confirmação (não destrutivo).
+  const [confirmTo, setConfirmTo] = useState<AppointmentStatus | null>(null);
 
   const transitions = nextTransitions(appointment.status);
 
-  function handleTransition(to: AppointmentStatus) {
-    // Cancelar abre o diálogo com motivo; demais transições vão direto.
-    if (isDestructive(to)) {
+  // Ao escolher um status no menu: cancelar abre o modal de motivo; os demais, o de confirmação.
+  function handlePickStatus(to: AppointmentStatus) {
+    setMenuOpen(false);
+    if (to === 'cancelled') {
       setCancelOpen(true);
-      return;
+    } else {
+      setConfirmTo(to);
     }
-    runTransition(to);
   }
 
   function runTransition(to: AppointmentStatus, reason?: string) {
@@ -85,6 +108,9 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
           if (to === 'cancelled') {
             toast.success('Agendamento cancelado.');
             setCancelOpen(false);
+          } else {
+            toast.success('Status atualizado.');
+            setConfirmTo(null);
           }
         },
         onError: (err) => {
@@ -147,14 +173,59 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span
-            className={cn(
-              'rounded-full px-2.5 py-0.5 text-xs font-medium',
-              STATUS_BADGE[appointment.status],
-            )}
-          >
-            {appointment.statusLabel}
-          </span>
+          {!trashView && transitions.length > 0 ? (
+            <Popover open={menuOpen} onOpenChange={setMenuOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  title="Alterar status"
+                  className={cn(
+                    'flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-80',
+                    STATUS_BADGE[appointment.status],
+                  )}
+                >
+                  {appointment.statusLabel}
+                  <ChevronDown className="size-3" aria-hidden />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-44 p-1">
+                <p className="px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  Alterar para
+                </p>
+                {transitions.map((to) => (
+                  <button
+                    key={to}
+                    type="button"
+                    onClick={() => handlePickStatus(to)}
+                    className={cn(
+                      'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                      to === 'cancelled'
+                        ? 'text-destructive hover:bg-destructive/10'
+                        : 'hover:bg-muted',
+                    )}
+                  >
+                    {to === 'cancelled' ? (
+                      <Ban className="size-4" aria-hidden />
+                    ) : to === 'completed' ? (
+                      <Check className="size-4" aria-hidden />
+                    ) : (
+                      <CircleCheck className="size-4" aria-hidden />
+                    )}
+                    {STATUS_LABELS[to]}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <span
+              className={cn(
+                'rounded-full px-2.5 py-0.5 text-xs font-medium',
+                STATUS_BADGE[appointment.status],
+              )}
+            >
+              {appointment.statusLabel}
+            </span>
+          )}
           <span className="font-mono text-[11px] tracking-wide text-muted-foreground">
             {appointment.code}
           </span>
@@ -246,47 +317,25 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
             Restaurar
           </button>
         ) : (
-          <div className="flex items-center gap-2">
-            {transitions.map((to) => (
-              <button
-                key={to}
-                type="button"
-                disabled={updateStatus.isPending}
-                onClick={() => handleTransition(to)}
-                className={cn(
-                  'flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                  'disabled:pointer-events-none disabled:opacity-60',
-                  isDestructive(to)
-                    ? 'border-destructive/40 text-destructive hover:bg-destructive/10'
-                    : 'border-primary/40 text-primary hover:bg-primary/10',
-                )}
-              >
-                {pendingTo === to && <Loader2 className="size-3.5 animate-spin" aria-hidden />}
-                {ACTION_LABEL[to]}
-              </button>
-            ))}
-
-            <button
-              type="button"
-              onClick={() => setDeleteOpen(true)}
-              disabled={deleteAppointment.isPending}
-              aria-label={`Excluir agendamento ${appointment.code}`}
-              title="Excluir"
-              className={cn(
-                'flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors',
-                'hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                'disabled:pointer-events-none disabled:opacity-60',
-              )}
-            >
-              {deleteAppointment.isPending ? (
-                <Loader2 className="size-4 animate-spin" aria-hidden />
-              ) : (
-                <Trash2 className="size-4" aria-hidden />
-              )}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setDeleteOpen(true)}
+            disabled={deleteAppointment.isPending}
+            aria-label={`Excluir agendamento ${appointment.code}`}
+            title="Excluir"
+            className={cn(
+              'flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors',
+              'hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'disabled:pointer-events-none disabled:opacity-60',
+            )}
+          >
+            {deleteAppointment.isPending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Trash2 className="size-4" aria-hidden />
+            )}
+          </button>
         )}
       </div>
     </div>
@@ -324,6 +373,35 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
       confirmLabel="Sim, excluir"
       pending={deleteAppointment.isPending}
       onConfirm={(reason) => runDelete(reason)}
+    />
+
+    <ConfirmDialog
+      open={confirmTo !== null}
+      onOpenChange={(o) => {
+        if (!o) setConfirmTo(null);
+      }}
+      title={(confirmTo && CONFIRM_COPY[confirmTo]?.title) || 'Alterar status?'}
+      description={
+        <>
+          O atendimento de{' '}
+          <span className="font-medium text-foreground">{appointment.customer.name}</span> será
+          marcado como{' '}
+          <span className="font-medium text-foreground">
+            {confirmTo ? STATUS_LABELS[confirmTo].toLowerCase() : ''}
+          </span>
+          .
+        </>
+      }
+      confirmLabel={(confirmTo && CONFIRM_COPY[confirmTo]?.label) || 'Confirmar'}
+      icon={
+        confirmTo === 'completed' ? (
+          <Check className="size-5" aria-hidden />
+        ) : (
+          <CircleCheck className="size-5" aria-hidden />
+        )
+      }
+      pending={pendingTo === confirmTo}
+      onConfirm={() => confirmTo && runTransition(confirmTo)}
     />
     </>
   );
