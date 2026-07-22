@@ -48,6 +48,14 @@ export function BookingSuccessDialog({ open, onOpenChange, code, email, onNewBoo
           <p className="font-heading text-2xl font-bold tracking-[0.15em] text-primary">{code}</p>
         </div>
 
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-left text-xs leading-relaxed text-amber-900">
+          <p className="font-semibold">ATENÇÃO! 🚨</p>
+          <p className="mt-1">
+            Pedimos, por gentileza, que chegue no horário. Em caso de atraso superior a 15 minutos, o
+            agendamento poderá ser adiado automaticamente. Agradecemos pela preferência!
+          </p>
+        </div>
+
         <div className="mt-1 flex flex-col gap-2">
           <Link
             href="/meus-agendamentos"
