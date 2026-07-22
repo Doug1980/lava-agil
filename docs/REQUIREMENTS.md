@@ -95,10 +95,10 @@ O enunciado lista as duas ações separadamente (RF-02.5 e RF-02.6), então trat
 
 | Ação | Efeito | Reversível |
 |---|---|---|
-| **Cancelar** | Muda `status` para `cancelled`. Preserva o registro e o histórico. Libera o slot. | Sim |
-| **Excluir** | Remove o registro do banco. Exige confirmação explícita. | Não |
+| **Cancelar** | Muda `status` para `cancelled`. Preserva o registro e o histórico. Libera o slot. Exige **motivo** (registrado em `cancel_reason`). | Sim |
+| **Excluir** | Exclusão suave (*soft-delete*): grava `deleted_at` + `delete_reason`, some das listas e libera o slot, mas o registro **continua no banco**. Exige confirmação com **motivo**. | Sim (via lixeira) |
 
-Cancelar é operação de negócio. Excluir é operação de manutenção, para lidar com registros de teste ou spam.
+Cancelar é operação de negócio. Excluir é operação de manutenção, para lidar com registros de teste ou spam — mas nada é apagado de fato: o admin recupera pelo filtro **"Excluídos"** (a restauração respeita a constraint de agenda e falha se o horário já tiver sido reservado por outro). Ambas as ações registram o motivo, dando rastreabilidade ao histórico.
 
 ### 2.5 Máquina de estados do agendamento
 
@@ -178,7 +178,12 @@ Funcionalidades além do enunciado, escolhidas por agregarem valor sem compromet
 | RD-10 | Testes automatizados das regras de disponibilidade | A regra mais crítica do sistema não pode depender de teste manual |
 | RD-11 | Estados de loading, vazio e erro tratados | Critério explícito de avaliação (experiência do usuário) |
 | RD-12 | Acessibilidade básica (labels, foco visível, navegação por teclado) | Boa prática |
-| RD-13 | Tema claro e escuro | UX |
+| RD-13 | Tema claro e escuro (tokens) | UX |
+| RD-14 | Exclusão suave com lixeira e restauração | Nada se perde; excluídos são recuperáveis com segurança contra sobreposição de horário |
+| RD-15 | Motivo obrigatório ao cancelar e ao excluir | Rastreabilidade real do histórico (por que cada atendimento saiu da agenda) |
+| RD-16 | Valor "a cobrar" pelos itens efetivamente realizados | Reflete a operação real: cliente pode desistir de um adicional na hora |
+| RD-17 | Contador de novos agendamentos + atualização automática (polling) | Admin vê novos pedidos e mudanças de status sem recarregar a página |
+| RD-18 | Logo do e-mail embutido inline (CID) | Renderiza em qualquer cliente de e-mail, sem depender de URL externa |
 
 ---
 
@@ -201,16 +206,25 @@ Registrado explicitamente para proteger o prazo. Não são esquecimentos, são c
 
 ## 5. Rastreabilidade
 
-Cada requisito será marcado como concluído aqui conforme o desenvolvimento avança.
+Estado final de cada requisito. Todos os requisitos explícitos do enunciado estão implementados, em produção e cobertos pelos testes de domínio das regras críticas.
 
-| Requisito | Status | Etapa |
+| Requisito | Status | Onde |
 |---|---|---|
-| RF-01.1 a RF-01.5 | Pendente | D3 |
-| RF-02.1 a RF-02.6 | Pendente | D4 |
-| RNF-01 | Pendente | D3, D4 |
-| RNF-02 | Pendente | D1 |
-| RNF-03 | Pendente | D2, D3 |
-| RNF-04 | Contínuo | D1 a D5 |
-| RNF-05 | Pendente | D1 |
-| RNF-06 | Pendente | D5 |
-| RNF-07 | Em andamento | D1, D5 |
+| RF-01.1 Agendar serviço | ✅ Concluído | Fluxo `/agendar` (veículo → serviço → adicionais → data → horário) |
+| RF-01.2 Nome, telefone, serviço, data, horário | ✅ Concluído | `booking-form` (+ e-mail e veículo) com validação Zod |
+| RF-01.3 Confirmação do agendamento | ✅ Concluído | Modal de confirmação (revisão) + modal de sucesso com código + e-mail |
+| RF-01.4 Consultar horários disponíveis | ✅ Concluído | Grade reativa (`slot-grid` + `use-availability`) |
+| RF-01.5 Não selecionar horários ocupados | ✅ Concluído | Slots bloqueados + constraint `EXCLUDE` no banco |
+| RF-02.1 Ver todos os agendamentos | ✅ Concluído | Painel admin, filtro "Todos" |
+| RF-02.2 Ver dados dos clientes | ✅ Concluído | Card com nome, telefone, e-mail e veículo |
+| RF-02.3 Filtrar por data | ✅ Concluído | Filtro por data + recorte Dia/Mês + busca por nome/código |
+| RF-02.4 Alterar status | ✅ Concluído | Dropdown com máquina de estados validada no servidor |
+| RF-02.5 Cancelar | ✅ Concluído | Transição para `cancelled` com motivo |
+| RF-02.6 Excluir | ✅ Concluído | Soft-delete com motivo, recuperável via lixeira |
+| RNF-01 Responsiva | ✅ Concluído | Layout mobile-first (Tailwind) |
+| RNF-02 Persistência | ✅ Concluído | Postgres (Neon) + Drizzle ORM |
+| RNF-03 Validação de formulários | ✅ Concluído | Zod + React Hook Form (schema compartilhado front/back) |
+| RNF-04 Organização e boas práticas | ✅ Contínuo | Módulos por domínio, tipos compartilhados, Biome |
+| RNF-05 Separação cliente/admin | ✅ Concluído | Rotas distintas + `requireAdmin` no servidor |
+| RNF-06 Deploy público | ✅ Concluído | Vercel — https://lava-agil.vercel.app |
+| RNF-07 README completo | ✅ Concluído | Tecnologias, IA, execução, credenciais e decisões |

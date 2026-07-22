@@ -224,8 +224,8 @@ pnpm dev
 | Campo | Valor |
 |---|---|
 | URL | https://lava-agil.vercel.app/entrar |
-| E-mail | _preencher com o e-mail admin de demonstração_ |
-| Senha | _preencher_ |
+| E-mail | `admin_master@hotmail.com` |
+| Senha | `112233@445566` |
 
 > O usuário administrador tem permissão total sobre os agendamentos.
 
