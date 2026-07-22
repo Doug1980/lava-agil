@@ -91,7 +91,7 @@ export function BookingPanel({
             {hasDate && !empty && (
               <span className="inline-flex items-center gap-1 rounded-full bg-[#fcbb05] px-2 py-0.5 text-[10px] font-bold text-[#7a4e00]">
                 <Sparkles className="size-3" aria-hidden />
-                ao vivo
+                horários disponníveis
               </span>
             )}
           </div>

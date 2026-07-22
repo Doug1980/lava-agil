@@ -5,8 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { BookingConfirmDialog } from '@/components/client/booking-confirm-dialog';
 import { TIMEZONE } from '@/lib/constants';
 import { maskPhone, maskPlate, unmaskDigits } from '@/lib/format';
 import type { CreateAppointmentInput } from '@/lib/schemas/appointment';
@@ -54,6 +56,8 @@ type Props = {
   serviceVariantIds: string[];
   date: string; // yyyy-MM-dd
   time: string; // HH:mm
+  priceCents: number;
+  items: { name: string; priceCents: number }[];
   onBooked: (appointment: Appointment) => void;
   onSlotTaken?: () => void;
 };
@@ -79,9 +83,13 @@ export function BookingForm({
   serviceVariantIds,
   date,
   time,
+  priceCents,
+  items,
   onBooked,
   onSlotTaken,
 }: Props) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const form = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
     defaultValues: {
@@ -119,9 +127,15 @@ export function BookingForm({
         err instanceof BookingError ? err.message : 'Não foi possível concluir o agendamento.',
       );
     },
+    onSettled: () => setConfirmOpen(false),
   });
 
-  const onSubmit = form.handleSubmit((values) => mutation.mutate(values));
+  // Submeter valida o formulário e abre o modal de confirmação.
+  const onSubmit = form.handleSubmit(() => setConfirmOpen(true));
+
+  function handleConfirm() {
+    mutation.mutate(form.getValues());
+  }
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
@@ -209,6 +223,18 @@ export function BookingForm({
         {mutation.isPending && <Loader2 className="size-4 animate-spin" aria-hidden />}
         {mutation.isPending ? 'Agendando...' : 'Confirmar agendamento'}
       </button>
+
+      <BookingConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        vehicleSize={vehicleSize}
+        items={items}
+        date={date}
+        time={time}
+        totalCents={priceCents}
+        pending={mutation.isPending}
+        onConfirm={handleConfirm}
+      />
     </form>
   );
 }

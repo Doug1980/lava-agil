@@ -3,8 +3,8 @@
 import { Check, Clock, Wallet } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { BookingConfirmation } from '@/components/client/booking-confirmation';
 import { BookingForm } from '@/components/client/booking-form';
+import { BookingSuccessDialog } from '@/components/client/booking-success-dialog';
 import { BookingPanel } from '@/components/client/booking-panel';
 import { DatePicker } from '@/components/client/date-picker';
 import { AddonPicker, BaseServicePicker } from '@/components/client/service-picker';
@@ -73,15 +73,9 @@ export function BookingFlow() {
   function handleReset() {
     cart.clear();
     setSelectedTime(null);
+    setDate(null);
     setBooked(null);
-  }
-
-  if (booked) {
-    return (
-      <main className="mx-auto max-w-2xl px-4 py-10">
-        <BookingConfirmation appointment={booked} onReset={handleReset} />
-      </main>
-    );
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   const canBook =
@@ -231,6 +225,8 @@ export function BookingFlow() {
             serviceVariantIds={cart.variantIds}
             date={date}
             time={selectedTime}
+            priceCents={cart.totals.priceCents}
+            items={cart.items.map((i) => ({ name: i.name, priceCents: i.priceCents }))}
             onBooked={handleBooked}
             onSlotTaken={() => {
               setSelectedTime(null);
@@ -263,6 +259,16 @@ export function BookingFlow() {
           </div>
         </div>
       )}
+
+      <BookingSuccessDialog
+        open={booked !== null}
+        onOpenChange={(o) => {
+          if (!o) handleReset();
+        }}
+        code={booked?.code ?? ''}
+        email={booked?.customer.email ?? null}
+        onNewBooking={handleReset}
+      />
     </main>
   );
 }
