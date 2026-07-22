@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDuration } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { VehicleSize } from '@/types/api';
 
@@ -23,9 +23,10 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   vehicleSize: VehicleSize;
-  items: { name: string; priceCents: number }[];
+  items: { name: string; durationMinutes: number; priceCents: number }[];
   date: string; // yyyy-MM-dd
   time: string; // HH:mm
+  totalMinutes: number;
   totalCents: number;
   pending: boolean;
   onConfirm: () => void;
@@ -38,6 +39,7 @@ export function BookingConfirmDialog({
   items,
   date,
   time,
+  totalMinutes,
   totalCents,
   pending,
   onConfirm,
@@ -83,17 +85,22 @@ export function BookingConfirmDialog({
                 <li key={item.name} className="flex items-center justify-between gap-3">
                   <span className="min-w-0 truncate">{item.name}</span>
                   <span className="shrink-0 tabular-nums text-muted-foreground">
-                    {formatCurrency(item.priceCents)}
+                    {formatDuration(item.durationMinutes)} · {formatCurrency(item.priceCents)}
                   </span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="mt-2 flex items-center justify-between border-t border-dashed pt-2">
+          <div className="mt-2 flex items-center justify-between gap-3 border-t border-dashed pt-2">
             <span className="text-muted-foreground">Total</span>
-            <span className="font-heading text-base font-bold tabular-nums text-primary">
-              {formatCurrency(totalCents)}
+            <span className="flex items-baseline gap-2">
+              <span className="text-xs tabular-nums text-muted-foreground">
+                {formatDuration(totalMinutes)}
+              </span>
+              <span className="font-heading text-base font-bold tabular-nums text-primary">
+                {formatCurrency(totalCents)}
+              </span>
             </span>
           </div>
         </div>

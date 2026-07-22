@@ -57,7 +57,8 @@ type Props = {
   date: string; // yyyy-MM-dd
   time: string; // HH:mm
   priceCents: number;
-  items: { name: string; priceCents: number }[];
+  durationMinutes: number;
+  items: { name: string; durationMinutes: number; priceCents: number }[];
   onBooked: (appointment: Appointment) => void;
   onSlotTaken?: () => void;
 };
@@ -84,6 +85,7 @@ export function BookingForm({
   date,
   time,
   priceCents,
+  durationMinutes,
   items,
   onBooked,
   onSlotTaken,
@@ -231,6 +233,7 @@ export function BookingForm({
         items={items}
         date={date}
         time={time}
+        totalMinutes={durationMinutes}
         totalCents={priceCents}
         pending={mutation.isPending}
         onConfirm={handleConfirm}

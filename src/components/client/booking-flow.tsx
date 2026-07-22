@@ -226,7 +226,12 @@ export function BookingFlow() {
             date={date}
             time={selectedTime}
             priceCents={cart.totals.priceCents}
-            items={cart.items.map((i) => ({ name: i.name, priceCents: i.priceCents }))}
+            durationMinutes={cart.totals.durationMinutes}
+            items={cart.items.map((i) => ({
+              name: i.name,
+              durationMinutes: i.durationMinutes,
+              priceCents: i.priceCents,
+            }))}
             onBooked={handleBooked}
             onSlotTaken={() => {
               setSelectedTime(null);
