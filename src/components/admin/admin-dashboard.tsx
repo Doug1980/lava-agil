@@ -52,12 +52,14 @@ export function AdminDashboard() {
   const [search, setSearch] = useState('');
 
   const isTrash = status === 'deleted';
+  // "Todos" traz ativos + excluídos; a lixeira só excluídos; status específico só ativos.
+  const scope = status === 'all' ? 'all' : status === 'deleted' ? 'deleted' : 'active';
 
   const query = useAppointments({
     date,
     status: status === 'all' || status === 'deleted' ? undefined : status,
     period,
-    deleted: isTrash,
+    scope,
   });
 
   // Busca client-side por nome do cliente ou código.
@@ -71,13 +73,13 @@ export function AdminDashboard() {
     );
   }, [query.data, search]);
 
-  // Resumo do dia (ignora cancelados no faturamento).
+  // Resumo (só ativos; ignora excluídos sempre e cancelados no faturamento).
   const summary = useMemo(() => {
-    const rows = query.data ?? [];
-    const active = rows.filter((a) => a.status !== 'cancelled');
+    const rows = (query.data ?? []).filter((a) => !a.deletedAt);
+    const billable = rows.filter((a) => a.status !== 'cancelled');
     return {
       total: rows.length,
-      revenueCents: active.reduce((acc, a) => acc + a.totalPriceCents, 0),
+      revenueCents: billable.reduce((acc, a) => acc + a.totalPriceCents, 0),
       completed: rows.filter((a) => a.status === 'completed').length,
     };
   }, [query.data]);
@@ -223,7 +225,7 @@ export function AdminDashboard() {
               <AppointmentCard
                 appointment={appointment}
                 showDate={period === 'month'}
-                trashView={isTrash}
+                trashView={Boolean(appointment.deletedAt)}
               />
             </div>
           ))}

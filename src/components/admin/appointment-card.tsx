@@ -239,12 +239,12 @@ export function AppointmentCard({ appointment, showDate = false, trashView = fal
                     type="button"
                     title="Alterar status"
                     className={cn(
-                      'flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium transition-opacity hover:opacity-80',
+                      'flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xl font-medium transition-opacity hover:opacity-80',
                       STATUS_BADGE[appointment.status],
                     )}
                   >
                     {appointment.statusLabel}
-                    <ChevronDown className="size-3" aria-hidden />
+                    <ChevronDown className="size-4" aria-hidden />
                   </button>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-48 p-1">

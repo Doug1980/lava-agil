@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       date: searchParams.get('date') ?? undefined,
       status: searchParams.get('status') ?? undefined,
       period: searchParams.get('period') ?? undefined,
-      deleted: searchParams.get('deleted') ?? undefined,
+      scope: searchParams.get('scope') ?? undefined,
     });
 
     const rows = await listAppointments(filters);

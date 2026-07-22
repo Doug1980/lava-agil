@@ -59,11 +59,8 @@ export const listAppointmentsQuerySchema = z.object({
   status: appointmentStatusSchema.optional(),
   // Recorte de tempo: dia da data informada (padrão) ou o mês inteiro dela.
   period: z.enum(['day', 'month']).optional().default('day'),
-  // Quando true, retorna a "lixeira" (só os excluídos).
-  deleted: z
-    .enum(['true', 'false'])
-    .optional()
-    .transform((v) => v === 'true'),
+  // active = só ativos (padrão) · deleted = só a lixeira · all = ativos + excluídos.
+  scope: z.enum(['active', 'deleted', 'all']).optional().default('active'),
 });
 
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;

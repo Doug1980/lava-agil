@@ -52,13 +52,14 @@ export async function listAppointments(filters: {
   date?: string;
   status?: AppointmentStatus;
   period?: 'day' | 'month';
-  deleted?: boolean;
+  scope?: 'active' | 'deleted' | 'all';
 }) {
   const db = getDb();
-  // Visão normal esconde excluídos; a "lixeira" mostra só os excluídos.
-  const conditions = [
-    filters.deleted ? isNotNull(appointments.deletedAt) : isNull(appointments.deletedAt),
-  ];
+  const scope = filters.scope ?? 'active';
+  // active esconde excluídos · deleted mostra só a lixeira · all traz ambos.
+  const conditions = [];
+  if (scope === 'active') conditions.push(isNull(appointments.deletedAt));
+  else if (scope === 'deleted') conditions.push(isNotNull(appointments.deletedAt));
 
   if (filters.date) {
     if (filters.period === 'month') {
@@ -77,15 +78,15 @@ export async function listAppointments(filters: {
     }
   }
 
-  if (!filters.deleted && filters.status) {
+  if (scope !== 'deleted' && filters.status) {
     conditions.push(eq(appointments.status, filters.status));
   }
 
   return db.query.appointments.findMany({
-    where: and(...conditions),
+    where: conditions.length ? and(...conditions) : undefined,
     with: { items: true },
     // Na lixeira, os mais recentemente excluídos primeiro; caso contrário, por horário.
-    orderBy: filters.deleted ? [desc(appointments.deletedAt)] : [asc(appointments.startsAt)],
+    orderBy: scope === 'deleted' ? [desc(appointments.deletedAt)] : [asc(appointments.startsAt)],
   });
 }
 

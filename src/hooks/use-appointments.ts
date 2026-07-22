@@ -8,7 +8,7 @@ type Filters = {
   date?: string;
   status?: AppointmentStatus;
   period?: 'day' | 'month';
-  deleted?: boolean;
+  scope?: 'active' | 'deleted' | 'all';
 };
 
 function buildQuery(filters: Filters): string {
@@ -16,7 +16,7 @@ function buildQuery(filters: Filters): string {
   if (filters.date) params.set('date', filters.date);
   if (filters.status) params.set('status', filters.status);
   if (filters.period) params.set('period', filters.period);
-  if (filters.deleted) params.set('deleted', 'true');
+  if (filters.scope && filters.scope !== 'active') params.set('scope', filters.scope);
   const qs = params.toString();
   return qs ? `?${qs}` : '';
 }
@@ -28,7 +28,7 @@ export function useAppointments(filters: Filters) {
       filters.date ?? null,
       filters.status ?? null,
       filters.period ?? 'day',
-      filters.deleted ?? false,
+      filters.scope ?? 'active',
     ],
     queryFn: () => apiFetch<Appointment[]>(`/api/appointments${buildQuery(filters)}`),
     staleTime: 15_000,
