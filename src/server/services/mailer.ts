@@ -1,5 +1,9 @@
 import nodemailer from 'nodemailer';
 import { formatCurrency, formatDateTime, formatDuration } from '@/lib/format';
+import { EMAIL_LOGO_BASE64 } from './email-logo';
+
+// Content-ID do logo embutido (referenciado no HTML como cid:LOGO_CID).
+const LOGO_CID = 'lavaagil-logo';
 
 export type BookingEmailData = {
   to: string;
@@ -28,7 +32,7 @@ function renderHtml(data: BookingEmailData): string {
 
   return `
   <div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; color: #111827;">
-    <img src="${data.appUrl}/logo-email.png" alt="LavaÁgil" width="160" style="display: block; height: auto; margin: 0 0 20px;" />
+    <img src="cid:${LOGO_CID}" alt="LavaÁgil" width="140" height="140" style="display: block; margin: 0 0 20px;" />
     <p style="font-size: 15px;">Olá, ${escapeHtml(data.customerName)}! Seu agendamento está confirmado.</p>
     <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; margin: 16px 0;">
       <p style="font-size: 12px; color: #6b7280; margin: 0 0 2px;">Código do agendamento</p>
@@ -71,5 +75,13 @@ export async function sendBookingConfirmation(data: BookingEmailData): Promise<v
     to: data.to,
     subject: `Agendamento confirmado · ${data.code}`,
     html: renderHtml(data),
+    attachments: [
+      {
+        filename: 'lavaagil.png',
+        content: Buffer.from(EMAIL_LOGO_BASE64, 'base64'),
+        contentType: 'image/png',
+        cid: LOGO_CID, // referenciado no HTML como <img src="cid:...">
+      },
+    ],
   });
 }
