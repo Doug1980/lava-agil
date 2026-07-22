@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { CalendarX, Car, Clock, Search, Trash2 } from 'lucide-react';
+import { CalendarX, Car, Clock, RefreshCw, Search, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api-client';
 import { formatDateTime, formatDuration } from '@/lib/format';
@@ -29,7 +29,12 @@ export function MyBookings() {
     queryFn: () =>
       apiFetch<PublicAppointment[]>(`/api/appointments/lookup?codes=${codes.join(',')}`),
     enabled: codes.length > 0,
-    staleTime: 15_000,
+    staleTime: 10_000,
+    // Atualização automática: consulta a cada 20s e ao voltar o foco para a aba,
+    // para refletir mudanças de status feitas pelo admin sem recarregar a página.
+    refetchInterval: 20_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 
   function handleLookup(e: React.FormEvent) {
@@ -43,11 +48,25 @@ export function MyBookings() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold uppercase tracking-wide">Meus agendamentos</h1>
-        <p className="text-sm text-muted-foreground">
-          Acompanhe o status dos seus atendimentos. A lista fica salva neste navegador.
-        </p>
+      <header className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold uppercase tracking-wide">Meus agendamentos</h1>
+          <p className="text-sm text-muted-foreground">
+            Acompanhe o status dos seus atendimentos. A lista fica salva neste navegador.
+          </p>
+        </div>
+        {codes.length > 0 && (
+          <button
+            type="button"
+            onClick={() => query.refetch()}
+            disabled={query.isFetching}
+            title="Atualizar"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:border-primary/50 disabled:opacity-60"
+          >
+            <RefreshCw className={cn('size-4', query.isFetching && 'animate-spin')} aria-hidden />
+            <span className="hidden sm:inline">Atualizar</span>
+          </button>
+        )}
       </header>
 
       <form onSubmit={handleLookup} className="mb-6 flex gap-2">
