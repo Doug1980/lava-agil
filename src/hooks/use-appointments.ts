@@ -31,7 +31,11 @@ export function useAppointments(filters: Filters) {
       filters.scope ?? 'active',
     ],
     queryFn: () => apiFetch<Appointment[]>(`/api/appointments${buildQuery(filters)}`),
-    staleTime: 15_000,
+    staleTime: 10_000,
+    // Atualização automática: reflete novos agendamentos e mudanças sem recarregar.
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 }
 

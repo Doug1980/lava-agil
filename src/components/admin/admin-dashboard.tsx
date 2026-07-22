@@ -62,6 +62,10 @@ export function AdminDashboard() {
     scope,
   });
 
+  // Contador de novos agendamentos pendentes (status "Agendado") no período atual.
+  const scheduledQuery = useAppointments({ date, status: 'scheduled', period, scope: 'active' });
+  const newCount = scheduledQuery.data?.length ?? 0;
+
   // Busca client-side por nome do cliente ou código.
   const list = useMemo(() => {
     const rows = query.data ?? [];
@@ -185,6 +189,17 @@ export function AdminDashboard() {
               >
                 {trash && <Trash2 className="size-3.5" aria-hidden />}
                 {STATUS_FILTER_LABEL[opt]}
+                {opt === 'scheduled' && newCount > 0 && (
+                  <span
+                    className={cn(
+                      'ml-1 flex min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-bold leading-none',
+                      active ? 'bg-white text-primary' : 'bg-amber-500 text-white',
+                    )}
+                    title={`${newCount} agendamento(s) aguardando`}
+                  >
+                    {newCount}
+                  </span>
+                )}
               </button>
             </div>
           );
