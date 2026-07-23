@@ -1,16 +1,23 @@
+<div align="center">
+
 # LavaÁgil
 
-> Seu carro limpo na hora certa.
+**Seu carro limpo na hora certa.**
 
-Sistema de agendamento para lava-rápido e estética automotiva. O cliente monta seu atendimento escolhendo um serviço base e adicionais opcionais, e a grade de horários se recalcula em tempo real conforme a duração total muda.
+Sistema de agendamento para lava-rápido e estética automotiva, com uma grade de horários que **se recalcula em tempo real** conforme o cliente monta o atendimento (serviço base + adicionais).
 
-**Status:** concluído e publicado em produção.
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=flat-square&logo=postgresql)](https://neon.tech/)
+[![Drizzle](https://img.shields.io/badge/Drizzle-ORM-C5F74F?style=flat-square&logo=drizzle)](https://orm.drizzle.team/)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth-FFCA28?style=flat-square&logo=firebase)](https://firebase.google.com/)
+[![Deploy](https://img.shields.io/badge/deploy-Vercel-black?style=flat-square&logo=vercel)](https://lava-agil.vercel.app)
+[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-| | |
-|---|---|
-| Aplicação em produção | https://lava-agil.vercel.app |
-| Repositório | https://github.com/Doug1980/lava-agil |
-| Desenvolvedor | Douglas Salazar |
+[Demo ao vivo](https://lava-agil.vercel.app) · [Repositório](https://github.com/Doug1980/lava-agil)
+
+</div>
 
 ---
 
@@ -18,6 +25,8 @@ Sistema de agendamento para lava-rápido e estética automotiva. O cliente monta
 
 - [O problema](#o-problema)
 - [O diferencial](#o-diferencial)
+- [Funcionalidades](#funcionalidades)
+- [Screenshots](#screenshots)
 - [Tecnologias utilizadas](#tecnologias-utilizadas)
 - [Ferramentas de IA utilizadas](#ferramentas-de-ia-utilizadas)
 - [Como executar localmente](#como-executar-localmente)
@@ -72,6 +81,54 @@ Com 115 minutos, os horários a partir das 16:05 desaparecem da grade, porque o 
 **Ordem de Serviço:** o checklist montado pelo cliente é persistido e vira a OS que o administrador vê quando o veículo chega. Nada precisa ser explicado no balcão, já está tudo acordado e registrado.
 
 **Acompanhamento sem login:** ao confirmar, o cliente recebe um **código** (ex.: `LA-JC7U8V`) na tela e por e-mail. Esse código é guardado no navegador, e a área **"Meus agendamentos"** lista os atendimentos com o status ao vivo (que muda de cor quando o administrador confirma, conclui ou cancela). Quem trocou de aparelho consulta pelo código.
+
+---
+
+## Funcionalidades
+
+### Área do cliente (sem cadastro)
+
+- **Agendamento em etapas** — porte do veículo → serviço base → adicionais → data → horário
+- **Grade de horários reativa** — recalcula em tempo real conforme a duração; nunca oferece um horário que não cabe
+- **Sem overbooking** — horários ocupados ficam indisponíveis, garantido por constraint no banco
+- **Confirmação em dois passos** — modal de revisão (itens, duração e total) e modal de sucesso com o código
+- **Código + e-mail** — comprovante com logo, código e aviso de pontualidade
+- **"Meus agendamentos"** — acompanhamento por código com status ao vivo, que atualiza sozinho sem recarregar
+
+### Área administrativa (autenticada)
+
+- **Painel de agendamentos** — lista com resumo do período (total, faturamento, concluídos)
+- **Filtros** — por data, recorte Dia/Mês, status e busca por nome ou código
+- **Dados do cliente** — nome, telefone, e-mail e veículo em cada card
+- **Status via dropdown** — Agendado → Confirmado → Concluído → Cancelado, respeitando a máquina de estados (com aviso ao tentar pular etapa)
+- **Cancelar com motivo** — registrado no histórico
+- **Excluir com motivo (soft-delete)** — some das listas mas continua no banco, recuperável
+- **Lixeira** — filtro "Excluídos" com restauração segura (barra se o horário já foi reservado)
+- **"A cobrar" por item** — marca o que foi feito; o valor reflete só os itens realizados
+- **Contador de novos agendamentos** e atualização automática do painel, sem recarregar
+- **Ordem de serviço** — checklist do atendimento persistido
+
+---
+
+## Screenshots
+
+> Capturas da aplicação. Substitua os arquivos em `docs/screenshots/` pelas imagens reais.
+
+<div align="center">
+
+### Fluxo de agendamento (cliente)
+![Fluxo de agendamento](docs/screenshots/agendar.png)
+
+### Confirmação e código do agendamento
+![Confirmação do agendamento](docs/screenshots/confirmacao.png)
+
+### Painel administrativo
+![Painel administrativo](docs/screenshots/admin.png)
+
+### Login administrativo
+![Login administrativo](docs/screenshots/login.png)
+
+</div>
 
 ---
 
@@ -295,6 +352,14 @@ No runtime serverless da Vercel, o `firebase-admin@14` puxa `jwks-rsa@4 → jose
 
 ---
 
+## Autor
+
+**Douglas Salazar**
+
+- GitHub: [@Doug1980](https://github.com/Doug1980)
+
+---
+
 ## Licença
 
-MIT
+[MIT](LICENSE)
