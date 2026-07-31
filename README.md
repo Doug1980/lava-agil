@@ -15,7 +15,7 @@ Sistema de agendamento para lava-rápido e estética automotiva, com uma grade d
 [![Deploy](https://img.shields.io/badge/deploy-Vercel-black?style=flat-square&logo=vercel)](https://lava-agil.vercel.app)
 [![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
 
-[Demo ao vivo](https://lava-agil.vercel.app) · [Repositório](https://github.com/Doug1980/lava-agil)
+[Agendar (demo)](https://lava-agil.vercel.app/agendar) · [Painel admin](https://lava-agil.vercel.app/entrar) · [Repositório](https://github.com/Doug1980/lava-agil)
 
 </div>
 
@@ -273,6 +273,15 @@ pnpm dev
 ---
 
 ## Credenciais de acesso
+
+**Acessos diretos:**
+
+| Área | URL |
+|---|---|
+| Agendamento (cliente, público) | https://lava-agil.vercel.app/agendar |
+| Painel administrativo (login) | https://lava-agil.vercel.app/entrar |
+
+> A raiz `https://lava-agil.vercel.app` redireciona conforme a sessão: visitante anônimo vai para o agendamento; admin já logado vai para o painel. Os links acima são explícitos e levam sempre ao destino certo, esteja logado ou não.
 
 **Área do cliente:** não requer autenticação. O agendamento é anônimo — o cliente informa nome, telefone, e-mail e veículo, e acompanha pelo código.
 
