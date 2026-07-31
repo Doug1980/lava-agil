@@ -4,7 +4,7 @@ export const SLOT_GRANULARITY_MINUTES = 15;
 
 export const BUFFER_MINUTES = 10;
 
-export const MIN_ADVANCE_MINUTES = 60;
+export const MIN_ADVANCE_MINUTES = 30;
 
 export const MAX_ADVANCE_DAYS = 60;
 

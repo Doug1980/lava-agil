@@ -71,12 +71,12 @@ describe('antecedência', () => {
     expect(slot).toMatchObject({ available: false, reason: 'past' });
   });
 
-  it('bloqueia horário dentro da antecedência mínima de 60min', () => {
+  it('bloqueia horário dentro da antecedência mínima de 30min', () => {
     const now = TZDate.tz(TIMEZONE, 2026, 6, 24, 10, 0, 0, 0);
     const day = availability(FRIDAY, 30, [], now);
 
-    expect(day.slots.find((s) => s.time === '10:45')).toMatchObject({ reason: 'past' });
-    expect(day.slots.find((s) => s.time === '11:00')).toMatchObject({ available: true });
+    expect(day.slots.find((s) => s.time === '10:15')).toMatchObject({ reason: 'past' });
+    expect(day.slots.find((s) => s.time === '10:30')).toMatchObject({ available: true });
   });
 });
 

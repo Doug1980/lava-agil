@@ -20,9 +20,9 @@ type Props = {
 export function SlotGrid({ data, isLoading, selected, onSelect }: Props) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+      <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
         {Array.from({ length: 24 }).map((_, i) => (
-          <Skeleton key={i} className="h-9" />
+          <Skeleton key={i} className="h-8" />
         ))}
       </div>
     );
@@ -42,7 +42,7 @@ export function SlotGrid({ data, isLoading, selected, onSelect }: Props) {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6" role="radiogroup" aria-label="Horário">
+      <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6" role="radiogroup" aria-label="Horário">
         {data.slots.map((slot) => {
           const isSelected = selected === slot.time;
           return (
@@ -60,7 +60,7 @@ export function SlotGrid({ data, isLoading, selected, onSelect }: Props) {
                   : undefined
               }
               className={cn(
-                'h-9 rounded-lg border text-sm font-semibold tabular-nums transition-all',
+                'h-8 rounded-md border text-[13px] font-medium tabular-nums transition-all',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 isSelected && 'border-transparent text-white shadow-md shadow-primary/30',
                 !isSelected &&

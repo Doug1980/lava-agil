@@ -78,7 +78,7 @@ Note que o paralelismo é **dentro** do slot, não **entre** slots. Se cada aten
 | ID | Regra |
 |---|---|
 | RN-01 | Não é possível agendar no passado |
-| RN-02 | Antecedência mínima de 60 minutos |
+| RN-02 | Antecedência mínima de 30 minutos |
 | RN-03 | Antecedência máxima de 60 dias |
 | RN-04 | O atendimento deve caber integralmente dentro do horário de funcionamento do dia |
 | RN-05 | Exatamente **um** serviço base é obrigatório |

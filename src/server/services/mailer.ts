@@ -33,7 +33,7 @@ function renderHtml(data: BookingEmailData): string {
   return `
   <div style="font-family: Arial, Helvetica, sans-serif; max-width: 480px; margin: 0 auto; color: #111827;">
     <img src="cid:${LOGO_CID}" alt="LavaÁgil" width="140" height="140" style="display: block; margin: 0 0 20px;" />
-    <p style="font-size: 15px;">Olá, ${escapeHtml(data.customerName)}! Seu agendamento está confirmado.</p>
+    <p style="font-size: 15px;">Olá, ${escapeHtml(data.customerName)}! Seu horário está agendado.</p>
     <div style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; margin: 16px 0;">
       <p style="font-size: 12px; color: #6b7280; margin: 0 0 2px;">Código do agendamento</p>
       <p style="font-size: 26px; font-weight: bold; letter-spacing: 2px; margin: 0 0 12px;">${escapeHtml(data.code)}</p>
