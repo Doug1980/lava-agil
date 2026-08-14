@@ -81,9 +81,17 @@ export function AdminDashboard() {
   const summary = useMemo(() => {
     const rows = (query.data ?? []).filter((a) => !a.deletedAt);
     const billable = rows.filter((a) => a.status !== 'cancelled');
+    // Faturamento: para atendimentos CONCLUÍDOS conta só os itens executados
+    // ("a cobrar"); para os em andamento, o valor previsto (agendado).
+    const revenueCents = billable.reduce((acc, a) => {
+      if (a.status === 'completed') {
+        return acc + a.items.reduce((s, i) => s + (i.completed ? i.priceCents : 0), 0);
+      }
+      return acc + a.totalPriceCents;
+    }, 0);
     return {
       total: rows.length,
-      revenueCents: billable.reduce((acc, a) => acc + a.totalPriceCents, 0),
+      revenueCents,
       completed: rows.filter((a) => a.status === 'completed').length,
     };
   }, [query.data]);
